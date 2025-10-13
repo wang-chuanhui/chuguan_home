@@ -1,0 +1,16 @@
+{
+  "domain": "chuguan_home",
+  "name": "ChuGuan Home",
+  "codeowners": [
+    "@wangchuanhui"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://www.home-assistant.io/integrations/chuguan_home",
+  "homekit": {},
+  "iot_class": "assumed_state",
+  "requirements": [],
+  "ssdp": [],
+  "zeroconf": [],
+  "version": "1.0.0"
+}

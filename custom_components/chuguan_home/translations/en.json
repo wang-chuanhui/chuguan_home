@@ -1,0 +1,30 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "设备已配置"
+        },
+        "error": {
+            "cannot_connect": "连接失败",
+            "invalid_auth": "无效的身份验证",
+            "unknown": "未知错误"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "host": "品牌",
+                    "password": "密码",
+                    "username": "用户名",
+                    "brand": "品牌"
+                }
+            }
+        }
+    },
+    "selector": {
+        "brand": {
+            "options": {
+                "cg": "初冠",
+                "xzh": "小智慧"
+            }
+        }
+    }
+}
