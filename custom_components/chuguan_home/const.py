@@ -8,6 +8,10 @@ BRAND_TYPES = [
     {"value": "xzh", "label": "xzh"}
 ]
 CONF_UUID: Final = "uuid"
+CONF_USER_ID: Final = "user_id"
+CONF_NICK_NAME: Final = "nick_name"
+CONF_HOME_ID: Final = "home_id"
+CONF_HOME_NAME: Final = "home_name"
 BASE_URL: Final = "https://www.chuguansmart.com"
 USER_URL: Final = f"{BASE_URL}/api/NewUserHandler.ashx"
 PROVINCE: Final = "ha"

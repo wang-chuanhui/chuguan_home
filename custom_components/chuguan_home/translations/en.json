@@ -6,7 +6,8 @@
         "error": {
             "cannot_connect": "连接失败",
             "invalid_auth": "无效的身份验证",
-            "unknown": "未知错误"
+            "unknown": "未知错误", 
+            "no_home_found": "未找到家庭"
         },
         "step": {
             "user": {
@@ -15,6 +16,11 @@
                     "password": "密码",
                     "username": "用户名",
                     "brand": "品牌"
+                }
+            }, 
+            "home": {
+                "data": {
+                    "home_id": "家庭"
                 }
             }
         }

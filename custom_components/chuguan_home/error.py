@@ -7,3 +7,7 @@ class CannotConnect(HomeAssistantError):
 
 class InvalidAuth(HomeAssistantError):
     """Error to indicate there is invalid auth."""
+
+
+class NoHomeFound(HomeAssistantError):
+    """Error to indicate no home found."""
