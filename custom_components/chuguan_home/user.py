@@ -1,6 +1,5 @@
 from .chuguan import ChuGuanHub
 from .model import HomeInfo, toHomeInfoList
-import aiohttp
 from .const import USER_URL
 
 
@@ -12,7 +11,7 @@ class UserHub(ChuGuanHub):
         self.account = account
         self.user_id = user_id
 
-    async def submit_data(self, session: aiohttp.ClientSession, url: str, payload: dict):
+    def update_payload(self, payload: dict):
         if self.account is not None:
             payload.update({
                 'holder': self.account
@@ -21,7 +20,7 @@ class UserHub(ChuGuanHub):
             payload.update({
                 'wxUserId': self.user_id
             })
-        return await super().submit_data(session, url, payload)
+        super().update_payload(payload)
     
     async def get_homes(self) -> list[HomeInfo]:
         """Get the list of homes."""

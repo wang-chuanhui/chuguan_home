@@ -19,13 +19,16 @@ class ChuGuanHub:
         self.brand = brand
         self.uuid = uuid
 
+    def update_payload(self, payload: dict):
+        payload.update({
+            'register': self.brand,
+            'wxUnionid': self.uuid,
+            'province': PROVINCE + '1.0.0'
+        })
+
     async def submit_data(self, session: aiohttp.ClientSession, url: str, payload: dict):
         try:
-            payload.update({
-                'register': self.brand,
-                'wxUnionid': self.uuid,
-                'province': PROVINCE + '1.0.0'
-            })
+            self.update_payload(payload)
             # 发送 POST 请求（自动设置 Content-Type: application/json）
             async with session.post(
                 url,
