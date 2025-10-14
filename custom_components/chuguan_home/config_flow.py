@@ -16,6 +16,8 @@ from .const import DOMAIN, CONF_BRAND, BRAND_TYPES, CONF_UUID, CONF_USER_ID, CON
 from .error import CannotConnect, InvalidAuth, NoHomeFound
 import uuid
 from .chuguan import ChuGuanHub
+from .user import UserHub
+from .model import HomeInfo
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,25 +55,27 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     
     return {CONF_BRAND: data[CONF_BRAND], CONF_USERNAME: user.account, CONF_UUID: data[CONF_UUID], CONF_USER_ID: user.userid, CONF_NICK_NAME: user.nickname}
 
-async def get_home(hass: HomeAssistant, data: dict[str, Any]) -> list[dict[str, Any]]:
-    """Validate the user input allows us to connect.
+async def get_home(hass: HomeAssistant, data: dict[str, Any]) -> list[HomeInfo]:
+    """Get the list of homes.
 
     Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
     """
     # TODO validate the data can be used to set up a connection.
     _LOGGER.info("validate_input with brand %s, username %s", data[CONF_BRAND], data[CONF_USERNAME])
     
-    hub = ChuGuanHub.create(data[CONF_BRAND], data[CONF_UUID], data[CONF_USERNAME], data[CONF_USER_ID])
+    hub = UserHub(data[CONF_BRAND], data[CONF_UUID], data[CONF_USERNAME], data[CONF_USER_ID])
     home_info_list = await hub.get_homes()
 
     if home_info_list is None or len(home_info_list) == 0:
         raise NoHomeFound
     
-    return [{'value': home_info.HomeId, 'label': home_info.HomeName} for home_info in home_info_list]
+    return home_info_list
 
 class ConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for chuguan_home."""
 
+    first_data = {}
+    homes: list[HomeInfo] = []
     VERSION = 1
 
     async def async_step_user(
@@ -92,21 +96,23 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             else:
                 _LOGGER.info("async_step_user with existing uuid %s", user_input[CONF_UUID])
             info = await validate_input(self.hass, user_input)
+            self.first_data = info
             _LOGGER.info("async_step_user with info %s", info)
-            home_info_list = await get_home(self.hass, info)
-            _LOGGER.info("async_step_user with home_info_list %s", home_info_list)
-            STEP_USER_HOME_SCHEMA = vol.Schema(
+            self.homes = await get_home(self.hass, info)
+            self.home_info_list = [{'value': home_info.HomeId, 'label': home_info.HomeName} for home_info in self.homes]
+            _LOGGER.info("async_step_home with home_info_list %s", self.home_info_list)
+            self.home_schema = vol.Schema(
                 {
                     vol.Required(CONF_HOME_ID): SelectSelector(
                         SelectSelectorConfig(
-                            options=home_info_list,
+                            options=self.home_info_list,
                             mode=SelectSelectorMode.DROPDOWN
                         )
                     )
                 }
             )
             return self.async_show_form(
-                step_id="home", data_schema=STEP_USER_HOME_SCHEMA, errors=errors
+                step_id="home", data_schema=self.home_schema, errors=errors
             )
         except CannotConnect:
             errors["base"] = "cannot_connect"
@@ -128,8 +134,31 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Handle the home step."""
         errors: dict[str, str] = {}
-        errors["base"] = "unknown"
-        return self.async_create_entry(title=user_input[CONF_NICK_NAME], data=user_input)
+
+        if user_input is None:
+            return self.async_show_form(
+                step_id="home", data_schema=self.home_schema, errors=errors
+            )
+
+        try:
+            home_id = user_input[CONF_HOME_ID]
+            home_name = ""
+            for home_info in self.homes:
+                if home_info.HomeId == home_id:
+                    home_name = home_info.HomeName
+                    break
+            else:
+                raise NoHomeFound
+            self.first_data[CONF_HOME_ID] = home_id
+            self.first_data[CONF_HOME_NAME] = home_name
+            title = f"{self.first_data[CONF_NICK_NAME]}-{home_name}"
+            return self.async_create_entry(title=title, data=self.first_data)
+        except NoHomeFound:
+            errors["base"] = "no_home_found"
+            return self.async_show_form(
+                step_id="home", data_schema=self.home_schema, errors=errors
+            )
+
 
 
 

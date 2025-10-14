@@ -5,6 +5,9 @@ from __future__ import annotations
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 # TODO List the platforms that you want to support.
 # For your initial PR, limit it to 1 platform.
@@ -23,6 +26,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: New_NameConfigEntry) -> 
     # TODO 2. Validate the API connection (and authentication)
     # TODO 3. Store an API object for your platforms to access
     # entry.runtime_data = MyAPI(...)
+
+    _LOGGER.info("async_setup_entry with entry %s %s", entry, entry.data)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
