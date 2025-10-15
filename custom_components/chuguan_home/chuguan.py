@@ -43,6 +43,7 @@ class ChuGuanHub:
                 if result_code == '10001':
                     raise InvalidAuth("登录失效")
                 message = result.get('message', '没有数据')
+                _LOGGER.info(f"{payload} {result}")
                 raise Exception(f"{result_code}, {message}")
         except aiohttp.ClientError as e:
             _LOGGER.error("POST 错误: %s", e)

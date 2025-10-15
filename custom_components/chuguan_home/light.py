@@ -15,7 +15,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry, async_ad
     for device in hub.devices:
         if device.device_type == 'light_wy':
             _LOGGER.info("Add light %s %s", device.device_id, device.device_name)
-            new_devices.append(ChuGuanLight(device, hub))
+            new_devices.append(ChuGuanLight(device))
     async_add_entities(new_devices)
 
 
@@ -23,50 +23,55 @@ class ChuGuanLight(LightEntity):
     """Chuguan Light"""
 
 
-    def __init__(self, device: ChuGuanDevice, hub: Hub):
+    def __init__(self, device: ChuGuanDevice):
         self._device = device
-        self._hub = hub
         self._attr_supported_color_modes = {ColorMode.BRIGHTNESS, ColorMode.ONOFF, ColorMode.COLOR_TEMP}
-        self._state = False
-        self._brightness = 1
-        self._temp = None
+        self._attr_min_color_temp_kelvin = 2200
+        self._attr_max_color_temp_kelvin = 5000
         self._attr_unique_id = f"{self._device.device_id}_light"
         self._attr_name = self._device.device_name
+        self._device.on('state_update', self._on_state_update)
+
+    def __del__(self):
+        """Stop device"""
+        _LOGGER.info("Stop light %s %s", self._device.device_id, self._device.device_name)
+
+    def _on_state_update(self, state: dict):
+        """On state update"""
+        self.hass.loop.call_soon_threadsafe(self.async_write_ha_state)
 
     @property
     def is_on(self) -> bool:
-        _LOGGER.info("is_on %s", self._state)
-        return self._state
+        return self._device.powerstate
     
     @property
     def brightness(self) -> int | None:
-        _LOGGER.info("brightness %s", self._brightness)
-        if self._state:
-            return self._brightness
-        return None
+        return self._device.brightness / 100 * 255
     
     @property
     def color_temp_kelvin(self) -> int | None:
-        _LOGGER.info("color_temp_kelvin %s", self._temp)
-        if self._state:
-            return self._temp
-        return None
+        value = self._device.colorTemperature
+        value = 100 - value
+        value = value * (self._attr_max_color_temp_kelvin - self._attr_min_color_temp_kelvin) / 100 + self._attr_min_color_temp_kelvin
+        return value
     
     async def async_turn_on(self, **kwargs):
         """Turn the light on."""
-        _LOGGER.info("async_turn_on %s %s", self._state, kwargs)
+        _LOGGER.info("async_turn_on %s", kwargs)
         await asyncio.sleep(0.5)
-        self._state = True
+        if self._device.powerstate == False:
+            await self._device.set_powerstate(True)
         if ATTR_BRIGHTNESS in kwargs:
-            self._brightness = kwargs[ATTR_BRIGHTNESS]
+            brightness = kwargs[ATTR_BRIGHTNESS]
+            value = brightness / 255 * 100
+            await self._device.set_brightness(round(value))
         if ATTR_COLOR_TEMP_KELVIN in kwargs:
-            self._temp = kwargs[ATTR_COLOR_TEMP_KELVIN]
+            vlaue = kwargs[ATTR_COLOR_TEMP_KELVIN]
+            value = 100 - (vlaue - self._attr_min_color_temp_kelvin) * 100 / (self._attr_max_color_temp_kelvin - self._attr_min_color_temp_kelvin)
+            await self._device.set_color_temp(round(value))
         self.async_write_ha_state()
 
 
     async def async_turn_off(self):
         """Turn the light off."""
-        await asyncio.sleep(0.5)
-        self._state = False
-        _LOGGER.info("async_turn_off %s", self._state)
-        self.async_write_ha_state()
+        await self._device.set_powerstate(False)

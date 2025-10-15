@@ -33,7 +33,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry) -> bool:
     await hub.async_get_devices()
     entry.runtime_data = hub
 
-    _LOGGER.info("async_setup_entry with entry %s %s", entry, entry.data)
+    # _LOGGER.info("async_setup_entry with entry %s %s", entry, entry.data)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
@@ -41,6 +41,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry) -> bool:
 
 
 # TODO Update entry annotation
-async def async_unload_entry(hass: HomeAssistant, entry: New_NameConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: HubConfigEntry) -> bool:
     """Unload a config entry."""
+    hub = entry.runtime_data
+    if hub is not None:
+        hub.stop()
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
