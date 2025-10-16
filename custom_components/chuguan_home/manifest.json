@@ -2,13 +2,15 @@
   "domain": "chuguan_home",
   "name": "ChuGuan Home",
   "codeowners": [
-    "@wangchuanhui"
+    "@ChuGuan"
   ],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://www.home-assistant.io/integrations/chuguan_home",
   "homekit": {},
-  "iot_class": "assumed_state",
+  "icon": "icon.png",
+  "integration_type": "hub",
+  "iot_class": "cloud_push",
   "requirements": [],
   "ssdp": [],
   "zeroconf": [],

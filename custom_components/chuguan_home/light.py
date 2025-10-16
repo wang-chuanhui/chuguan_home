@@ -2,7 +2,7 @@ from homeassistant.core import HomeAssistant
 from . import HubConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .hub import Hub, ChuGuanDevice
-from homeassistant.components.light import LightEntity, ATTR_BRIGHTNESS, ColorMode, ATTR_COLOR_TEMP_KELVIN
+from homeassistant.components.light import LightEntity, ATTR_BRIGHTNESS, ColorMode, ATTR_COLOR_TEMP_KELVIN, ATTR_RGB_COLOR
 import logging
 import asyncio
 
@@ -13,8 +13,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry, async_ad
     hub = entry.runtime_data
     new_devices = []
     for device in hub.devices:
-        if device.device_type == 'light_wy':
-            _LOGGER.info("Add light %s %s", device.device_id, device.device_name)
+        if device.device_type == 'light_wy' or device.device_type == 'light_rgb' or device.device_type == 'light':
+            _LOGGER.info("Add light %s %s", device.device_id, device.device)
             new_devices.append(ChuGuanLight(device))
     async_add_entities(new_devices)
 
@@ -25,7 +25,11 @@ class ChuGuanLight(LightEntity):
 
     def __init__(self, device: ChuGuanDevice):
         self._device = device
-        self._attr_supported_color_modes = {ColorMode.BRIGHTNESS, ColorMode.ONOFF, ColorMode.COLOR_TEMP}
+        self._attr_supported_color_modes = {ColorMode.ONOFF}
+        if self._device.device_type == "light_wy":
+            self._attr_supported_color_modes = {ColorMode.BRIGHTNESS, ColorMode.ONOFF, ColorMode.COLOR_TEMP}
+        elif self._device.device_type == "light_rgb":
+            self._attr_supported_color_modes = {ColorMode.BRIGHTNESS, ColorMode.ONOFF, ColorMode.RGB}
         self._attr_min_color_temp_kelvin = 2200
         self._attr_max_color_temp_kelvin = 5000
         self._attr_unique_id = f"{self._device.device_id}_light"
@@ -41,6 +45,11 @@ class ChuGuanLight(LightEntity):
         self.hass.loop.call_soon_threadsafe(self.async_write_ha_state)
 
     @property
+    def device_info(self) -> dict:
+        """Information about this entity/device."""
+        return self._device.device_info
+
+    @property
     def is_on(self) -> bool:
         return self._device.powerstate
     
@@ -54,11 +63,14 @@ class ChuGuanLight(LightEntity):
         value = 100 - value
         value = value * (self._attr_max_color_temp_kelvin - self._attr_min_color_temp_kelvin) / 100 + self._attr_min_color_temp_kelvin
         return value
+
+    @property
+    def rgb_color(self) -> tuple[int, int, int] | None:
+        return self._device.rgb
     
     async def async_turn_on(self, **kwargs):
         """Turn the light on."""
         _LOGGER.info("async_turn_on %s", kwargs)
-        await asyncio.sleep(0.5)
         if self._device.powerstate == False:
             await self._device.set_powerstate(True)
         if ATTR_BRIGHTNESS in kwargs:
@@ -69,7 +81,9 @@ class ChuGuanLight(LightEntity):
             vlaue = kwargs[ATTR_COLOR_TEMP_KELVIN]
             value = 100 - (vlaue - self._attr_min_color_temp_kelvin) * 100 / (self._attr_max_color_temp_kelvin - self._attr_min_color_temp_kelvin)
             await self._device.set_color_temp(round(value))
-        self.async_write_ha_state()
+        if ATTR_RGB_COLOR in kwargs:
+            rgb = kwargs[ATTR_RGB_COLOR]
+            await self._device.set_rgb_color(rgb[0], rgb[1], rgb[2])
 
 
     async def async_turn_off(self):

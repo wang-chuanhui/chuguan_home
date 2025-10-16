@@ -33,7 +33,7 @@ class ChuGuanHub:
             async with session.post(
                 url,
                 data=payload,
-                timeout=10
+                timeout=30
             ) as response:
                 text = await response.text()
                 result: dict = json.loads(text)

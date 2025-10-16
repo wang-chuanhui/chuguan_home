@@ -84,7 +84,7 @@ class HomeHub(UserHub):
             async with session.post(
                 url,
                 json=payload,
-                timeout=10
+                timeout=30
             ) as response:
                 status = response.status
                 if status != 200:
@@ -105,7 +105,7 @@ class HomeHub(UserHub):
         account = self.account
         data = { "payload": { "accessToken": f'wx/{account}', "appliance": { "applianceId": device.get('deviceId'), "additionalApplianceDetails": device.get('extensions') } }, "header": { "messageId": str(uuid.uuid4()), "namespace": "ThirdParty.ConnectedHome.Control", "name": name, "payloadVersion": "1" } }
         data['payload'].update(payload)
-        _LOGGER.info(f"Control device {device.get('deviceId')} with name {name} and payload {payload}")
+        _LOGGER.info(f"Control device {device.get('deviceId')} with name {name} and data {data}")
         result = await self.post_json(THIRD_URL, data)
         _LOGGER.info(f"result: {result}")
         return result
@@ -125,5 +125,10 @@ class HomeHub(UserHub):
     
     async def set_color_temp(self, device: dict, value: int):
         result = await self.control(device, 'SetColorTemperatureRequest', { "yellowLight": value })
+        return result
+    
+    async def set_rgb_color(self, device: dict, red: int, green: int, blue: int):
+        payload = { 'color': { "red": red, "green": green, "blue": blue } }
+        result = await self.control(device, 'SetColorRequest', payload)
         return result
 

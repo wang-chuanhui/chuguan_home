@@ -14,7 +14,7 @@ _LOGGER = logging.getLogger(__name__)
 
 # TODO List the platforms that you want to support.
 # For your initial PR, limit it to 1 platform.
-PLATFORMS: list[Platform] = [Platform.LIGHT]
+PLATFORMS: list[Platform] = [Platform.SWITCH, Platform.LIGHT, ]
 
 type HubConfigEntry = ConfigEntry[Hub]
 
@@ -29,8 +29,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry) -> bool:
 
     # TODO 4. Create an instance of your platform class
     # TODO 5. Add the instance to hass.data
-    hub = Hub(entry.data[CONF_BRAND], entry.data[CONF_UUID], entry.data[CONF_USERNAME], entry.data[CONF_USER_ID], entry.data[CONF_HOME_ID])
+    hub = Hub(hass, entry.data[CONF_BRAND], entry.data[CONF_UUID], entry.data[CONF_USERNAME], entry.data[CONF_USER_ID], entry.data[CONF_HOME_ID])
     await hub.async_get_devices()
+    hub.register_areas()
     entry.runtime_data = hub
 
     # _LOGGER.info("async_setup_entry with entry %s %s", entry, entry.data)
