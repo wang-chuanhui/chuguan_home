@@ -1,11 +1,8 @@
 from .user import UserHub
 from .const import USER_URL, THIRD_URL, DEVICE_URL
 import logging
-import asyncio
-import threading
 import uuid
-import aiohttp
-import json
+from .utils import post_json
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,30 +60,6 @@ class HomeHub(UserHub):
         _LOGGER.info(f"Choose home {self.home_id} result: {result}")
         return result
 
-    def choose_home_sync_non_blocking(self):
-        """同步方法：非阻塞调用choose_home异步方法"""
-        # 封装异步方法为协程对象（绑定当前实例）
-        coro = self.choose_home()
-
-        def _run_async():
-            """在子线程中运行事件循环的函数"""
-            # 为子线程创建独立事件循环
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            
-            try:
-                # 运行异步方法（不关心返回结果，只在后台执行）
-                loop.run_until_complete(coro)
-            except Exception as e:
-                _LOGGER.error(f"异步调用choose_home失败: {e}")
-            finally:
-                loop.close()
-
-        # 创建并启动子线程，设置为守护线程（随主线程退出）
-        thread = threading.Thread(target=_run_async, daemon=True)
-        thread.start()
-        # 不调用thread.join()，直接返回，实现非阻塞
-
     async def refresh_home_devices_state(self):
         """Refresh home devices state"""
         data = {'action': '307', 'actionType': 'PleaseRefreshHomeDevice', 'homeId': self.home_id}
@@ -94,29 +67,10 @@ class HomeHub(UserHub):
         _LOGGER.info(f"Refresh home devices state result: {result}")
         return result
 
-    async def submit_json(self, session: aiohttp.ClientSession, url: str, payload: dict):
-        try:
-            self.update_payload(payload)
-            # 发送 POST 请求（自动设置 Content-Type: application/json）
-            async with session.post(
-                url,
-                json=payload,
-                timeout=30
-            ) as response:
-                status = response.status
-                if status != 200:
-                    raise Exception(f"请求失败")
-                text = await response.text()
-                result: dict = json.loads(text)
-                return result
-        except aiohttp.ClientError as e:
-            _LOGGER.error("POST 错误: %s", e)
-            raise e;
-
     async def post_json(self, url: str, payload: dict):
         """POST data to the brand."""
-        async with aiohttp.ClientSession() as session:
-            return await self.submit_json(session, url, payload);
+        self.update_payload(payload)
+        return await post_json(url, payload)
 
     async def control(self, device : dict, name : str, payload : dict = {}):
         account = self.account

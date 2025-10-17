@@ -51,7 +51,8 @@ class Hub:
 
     def loop_choose_home(self):
         """Loop choose home"""
-        self._home_hub.choose_home_sync_non_blocking()
+        corn = self._home_hub.choose_home()
+        sync_non_blocking(corn)
 
     def on_subscribed(self):
         """On subscribed"""

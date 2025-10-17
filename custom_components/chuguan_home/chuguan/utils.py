@@ -56,3 +56,26 @@ async def post_data(url: str, payload: dict):
     """POST data to the brand."""
     async with aiohttp.ClientSession() as session:
         return await submit_data(session, url, payload);
+
+
+async def submit_json(session: aiohttp.ClientSession, url: str, payload: dict):
+    try:
+        async with session.post(
+            url,
+            json=payload,
+            timeout=30
+        ) as response:
+            status = response.status
+            if status != 200:
+                raise Exception(f"请求失败")
+            text = await response.text()
+            result: dict = json.loads(text)
+            return result
+    except aiohttp.ClientError as e:
+        _LOGGER.error("POST 错误: %s", e)
+        raise e;
+
+async def post_json(url: str, payload: dict):
+    """POST data to the brand."""
+    async with aiohttp.ClientSession() as session:
+        return await submit_json(session, url, payload);
