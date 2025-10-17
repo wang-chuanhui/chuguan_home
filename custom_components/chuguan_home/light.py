@@ -5,6 +5,7 @@ from .chuguan.hub import Hub, ChuGuanDevice
 from homeassistant.components.light import LightEntity, ATTR_BRIGHTNESS, ColorMode, ATTR_COLOR_TEMP_KELVIN, ATTR_RGB_COLOR
 import logging
 import asyncio
+from .entity import ChuGuanEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,14 +18,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry, async_ad
             _LOGGER.info("Add light %s %s", device.device_id, device.device)
             new_devices.append(ChuGuanLight(device))
     async_add_entities(new_devices)
+    ChuGuanEntity.register_entity_areas(hass, new_devices)
 
 
-class ChuGuanLight(LightEntity):
+class ChuGuanLight(ChuGuanEntity, LightEntity):
     """Chuguan Light"""
-
+    suffix: str = "light"
 
     def __init__(self, device: ChuGuanDevice):
-        self._device = device
+        super().__init__(device)
         self._attr_supported_color_modes = {ColorMode.ONOFF}
         if self._device.device_type == "light_wy":
             self._attr_supported_color_modes = {ColorMode.BRIGHTNESS, ColorMode.ONOFF, ColorMode.COLOR_TEMP}
@@ -32,20 +34,6 @@ class ChuGuanLight(LightEntity):
             self._attr_supported_color_modes = {ColorMode.BRIGHTNESS, ColorMode.ONOFF, ColorMode.RGB}
         self._attr_min_color_temp_kelvin = 2200
         self._attr_max_color_temp_kelvin = 5000
-        self._attr_unique_id = f"{self._device.device_id}_light"
-        self._attr_name = self._device.device_name
-        if self._device.has_state == False:
-            self._attr_assumed_state = True
-            self._attr_should_poll = False
-        self._device.on('state_update', self._on_state_update)
-
-    def __del__(self):
-        """Stop device"""
-        _LOGGER.info("Stop light %s %s", self._device.device_id, self._device.device_name)
-
-    def _on_state_update(self, state: dict):
-        """On state update"""
-        self.hass.loop.call_soon_threadsafe(self.async_write_ha_state)
     
     @property
     def icon(self):
