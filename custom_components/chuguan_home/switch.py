@@ -13,12 +13,10 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry, async_add_entities: AddEntitiesCallback):
     """Set up the Chuguan Home switch platform."""
-    _LOGGER.info('async_setup_entry switch with entry %s %s', entry, entry.data)
     hub = entry.runtime_data
     new_devices : list[ChuGuanSwitch]= []
     for device in hub.devices:
         if device.device_type == 'switch' or device.device_type == 'outlet':
-            _LOGGER.info("Add switch %s %s", device.device_id, device.device)
             new_devices.append(ChuGuanSwitch(device))
     async_add_entities(new_devices)
     ChuGuanEntity.register_entity_areas(hass, new_devices)

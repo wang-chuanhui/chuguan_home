@@ -12,7 +12,7 @@ class ChuGuanDevice(EventEmitter):
         self.device = device
         self.home = home
         hardware_name = self.hardware_name
-        if hardware_name.startswith('cg') or hardware_name.startswith('智能'):
+        if hardware_name.startswith('cg') or hardware_name.startswith('智能') or hardware_name.startswith('二代'):
             self.has_state = True
         else:
             self.has_state = False
@@ -36,6 +36,11 @@ class ChuGuanDevice(EventEmitter):
                 "suggested_area": self.zone,
             })
         return res
+
+    @property
+    def int_powerstate(self) -> bool:
+        res: int = self.state.get('powerstate', None)
+        return res
     
     @property
     def powerstate(self) -> bool:
@@ -56,6 +61,11 @@ class ChuGuanDevice(EventEmitter):
     def rgb(self) -> tuple[int, int, int]:
         res: dict = self.state.get('rgb', {'Red': 255, 'Green': 255, 'Blue': 255})
         return tuple(res.values())
+    @property
+    def position(self) -> int | None:
+        res: int = self.state.get('position', None)
+        return res
+    
 
     def update_state(self, state: dict):
         """Update state"""
@@ -99,3 +109,9 @@ class ChuGuanDevice(EventEmitter):
     
     async def set_rgb_color(self, red: int, green: int, blue: int):
         return await self.home.set_rgb_color(self.device, red, green, blue)
+
+    async def set_position(self, value: int):
+        return await self.home.set_position(self.device, value)
+    
+    async def set_pause(self):
+        return await self.home.set_pause(self.device)

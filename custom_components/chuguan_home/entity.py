@@ -4,12 +4,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 from homeassistant.helpers.area_registry import async_get as async_get_area_registry
 import logging
+import time
 
 _LOGGER = logging.getLogger(__name__)
 
 class ChuGuanEntity(Entity):
 
     suffix: str = "entity"
+    last_update_time: float = time.time()
     def __init__(self, device: ChuGuanDevice):
         self._device = device
         self._attr_unique_id = self._device.device_id + "_" + self.suffix
@@ -21,7 +23,14 @@ class ChuGuanEntity(Entity):
 
     def _on_state_changed(self, state: dict):
         """On state update"""
+        self.last_update_time = time.time()
+        self.publish_update()
+
+    def publish_update(self):
         self.hass.loop.call_soon_threadsafe(self.async_write_ha_state)
+
+    def second_of_last_update(self) -> float:
+        return time.time() - self.last_update_time
 
     @classmethod
     def register_entity_areas(cls, hass: HomeAssistant, entities: list["ChuGuanEntity"]):

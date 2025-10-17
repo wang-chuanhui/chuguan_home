@@ -102,4 +102,12 @@ class HomeHub(UserHub):
         payload = { 'color': { "red": red, "green": green, "blue": blue } }
         result = await self.control(device, 'SetColorRequest', payload)
         return result
+    
+    async def set_position(self, device: dict, position: int):
+        payload = { "deltaValue": { "value": f"{position}", "unit": "%" } }
+        result = await self.control(device, 'TurnOnRequest', payload)
+        return result
 
+    async def set_pause(self, device: dict):
+        result = await self.control(device, "PauseRequest", {})
+        return result

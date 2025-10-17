@@ -15,7 +15,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry, async_ad
     new_devices = []
     for device in hub.devices:
         if device.device_type == 'light_wy' or device.device_type == 'light_rgb' or device.device_type == 'light':
-            _LOGGER.info("Add light %s %s", device.device_id, device.device)
             new_devices.append(ChuGuanLight(device))
     async_add_entities(new_devices)
     ChuGuanEntity.register_entity_areas(hass, new_devices)
