@@ -5,6 +5,7 @@ import time
 from .transport import Transport
 import logging
 from .hub import Hub
+from .util import sync_non_blocking
 
 
 
@@ -16,7 +17,8 @@ logging.basicConfig(
 )
 
 if __name__ == "__main__":
-    h = Hub('cg', '03d6d715-60dd-48e5-b8aa-0ed7f809a23c', 'wangchuanhui', '0a7b059f-d835-4af4-a976-22898795c7fd', '15A20970-A93A-45E7-8D7E-74E0E6F82A9D')
+    h = Hub({}, 'cg', '50ca63d1-a358-4b7c-b795-ff60391c8efc', 'wangchuanhui2', '9479b3ae-16fd-43ba-bbf5-8d1561f3668e', '15A20970-A93A-45E7-8D7E-74E0E6F82A9D')
+    sync_non_blocking(h.async_get_devices())
 
     # h = Hub('cg', 'udvjyz6QJUXVrv1XTIJbxkHn1U8j5Utg', 'wangchuanhui1', 'bd4cc066-9fbf-4530-aafb-72e0c047e352', 'EE5DD040-0CB0-4E18-9F05-1C2311894113')
     stop_event = Event()

@@ -1,5 +1,5 @@
 from .user import UserHub
-from .const import USER_URL, THIRD_URL
+from .const import USER_URL, THIRD_URL, DEVICE_URL
 import logging
 import asyncio
 import threading
@@ -37,6 +37,23 @@ class HomeHub(UserHub):
             'actionType': 'GetWeCheatHomeSupportDevice'
         }
         result = await self.post_data(USER_URL, data)
+        return result
+    
+    async def get_tcp_devices(self):
+        """Get tcp devices"""
+        data = {
+            'action': '120'
+        }
+        result = await self.post_data(USER_URL, data)
+        return result
+    
+    async def get_mq_devices(self):
+        """Get mq devices"""
+        data = {
+            'action': '800', 
+            'actionType': "GetDeviceByHomeId"
+        }
+        result = await self.post_data(DEVICE_URL, data)
         return result
 
     async def choose_home(self):

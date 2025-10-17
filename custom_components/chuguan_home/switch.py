@@ -1,9 +1,12 @@
 from homeassistant.core import HomeAssistant
 from . import HubConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
+from homeassistant.helpers.area_registry import async_get as async_get_area_registry
 from .hub import ChuGuanDevice
 from homeassistant.components.switch import SwitchEntity, SwitchDeviceClass
 import logging
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -11,12 +14,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry, async_ad
     """Set up the Chuguan Home switch platform."""
     _LOGGER.info('async_setup_entry switch with entry %s %s', entry, entry.data)
     hub = entry.runtime_data
-    new_devices = []
+    new_devices : list[ChuGuanSwitch]= []
     for device in hub.devices:
         if device.device_type == 'switch' or device.device_type == 'outlet':
             _LOGGER.info("Add switch %s %s", device.device_id, device.device)
             new_devices.append(ChuGuanSwitch(device))
     async_add_entities(new_devices)
+    entity_registry = async_get_entity_registry(hass)
+    area_registry = async_get_area_registry(hass)
+    for device in new_devices:
+        area = area_registry.async_get_or_create(name=device._device.zone)
+        entity_registry.async_update_entity(device.entity_id, area_id=area.id)
+        _LOGGER.info(f"Add switch {device.entity_id} to area {area.id} {area.name}")
+
 
 
 class ChuGuanSwitch(SwitchEntity):

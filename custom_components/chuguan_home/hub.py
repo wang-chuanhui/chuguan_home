@@ -38,18 +38,6 @@ class Hub:
         devices = await self._home_hub.get_devices()
         self.devices = [ChuGuanDevice(device, self) for device in devices]
         return devices
-    
-    def register_areas(self):
-        """Register area"""
-        # area_registry: AreaRegistry = async_get_area_registry(self.hass)
-        # for device in self.devices:
-        #     zone = device.zone
-        #     if zone is None:
-        #         continue
-        #     area = area_registry.async_get_or_create(zone)
-        #     get = area_registry.async_get_area(area.id)
-        #     _LOGGER.info(f"Register area {area.name} for device {device.device_name}, ares: {area}, area_id: {area.id}, get: {get}")
-        #     device.area_id = area.id
 
 
     def loop_choose_home(self):
