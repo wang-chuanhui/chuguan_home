@@ -2,10 +2,10 @@
 # 2025-10-15 12:16:53.952 INFO (MainThread) [custom_components.chuguan_home] async_setup_entry with entry <ConfigEntry entry_id=01K7GT51AHDQY7M6Z5JSRWW8EV version=1 domain=chuguan_home title=wangchuanhui-我的家@9 state=ConfigEntryState.SETUP_IN_PROGRESS unique_id=None> {'brand': 'cg', 'home_id': '15A20970-A93A-45E7-8D7E-74E0E6F82A9D', 'home_name': '我的家@9', 'nick_name': 'wangchuanhui', 'user_id': '0a7b059f-d835-4af4-a976-22898795c7fd', 'username': 'wangchuanhui', 'uuid': '03d6d715-60dd-48e5-b8aa-0ed7f809a23c'}
 from threading import Event
 import time
-from .transport import Transport
+from .chuguan.transport import Transport
 import logging
-from .hub import Hub
-from .util import sync_non_blocking
+from .chuguan.hub import Hub
+from .chuguan.utils import sync_non_blocking
 
 
 

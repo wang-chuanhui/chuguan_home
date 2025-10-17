@@ -1,20 +1,29 @@
 from .home import HomeHub
 import logging
 import paho.mqtt.client as mqtt
-from .const import MQTT_BROKER, MQTT_PORT, PROVINCE, DOMAIN
+from ..const import DOMAIN
+from .const import MQTT_BROKER, MQTT_PORT, PROVINCE
 from .transport import Transport
-from .setinterval import SetInterval
-from .eventemitter import EventEmitter
-from .util import sync_non_blocking
+from .set_interval import SetInterval
+from .event_emitter import EventEmitter
+from .utils import sync_non_blocking
 from homeassistant.helpers.area_registry import async_get as async_get_area_registry, AreaRegistry
 from homeassistant.core import HomeAssistant
+from .brand import Brand
+from .user import UserHub
+
 
 _LOGGER = logging.getLogger(__name__)
 
-def loop_choose_home():
-    _LOGGER.info("Loop choose home")
+async def authenticate(brand: str, uuid: str, account: str, password: str):
+    """Authenticate"""
+    hub = Brand(brand, uuid)
+    return await hub.authenticate(account, password)
 
-
+async def get_homes(brand: str, uuid: str, account: str, user_id: str):
+    """Get homes"""
+    hub = UserHub(brand, uuid, account, user_id)
+    return await hub.get_homes()
 
 class Hub:
     """Hub"""

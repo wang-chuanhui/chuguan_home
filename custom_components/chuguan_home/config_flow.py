@@ -13,11 +13,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.selector import SelectSelector, SelectSelectorConfig, SelectSelectorMode
 
 from .const import DOMAIN, CONF_BRAND, BRAND_TYPES, CONF_UUID, CONF_USER_ID, CONF_NICK_NAME, CONF_HOME_ID, CONF_HOME_NAME
-from .error import CannotConnect, InvalidAuth, NoHomeFound
+from .chuguan.error import CannotConnect, InvalidAuth, NoHomeFound
 import uuid
-from .chuguan import ChuGuanHub
-from .user import UserHub
-from .model import HomeInfo
+from .chuguan.model import HomeInfo
+from .chuguan.hub import authenticate, get_homes
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,9 +45,8 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     """
     # TODO validate the data can be used to set up a connection.
     _LOGGER.info("validate_input with brand %s, username %s", data[CONF_BRAND], data[CONF_USERNAME])
-    
-    hub = ChuGuanHub(data[CONF_BRAND], data[CONF_UUID])
-    user = await hub.authenticate(data[CONF_USERNAME], data[CONF_PASSWORD])
+
+    user = await authenticate(data[CONF_BRAND], data[CONF_UUID], data[CONF_USERNAME], data[CONF_PASSWORD])
 
     if user is None:
         raise InvalidAuth
@@ -62,9 +60,8 @@ async def get_home(hass: HomeAssistant, data: dict[str, Any]) -> list[HomeInfo]:
     """
     # TODO validate the data can be used to set up a connection.
     _LOGGER.info("validate_input with brand %s, username %s", data[CONF_BRAND], data[CONF_USERNAME])
-    
-    hub = UserHub(data[CONF_BRAND], data[CONF_UUID], data[CONF_USERNAME], data[CONF_USER_ID])
-    home_info_list = await hub.get_homes()
+
+    home_info_list = await get_homes(data[CONF_BRAND], data[CONF_UUID], data[CONF_USERNAME], data[CONF_USER_ID])
 
     if home_info_list is None or len(home_info_list) == 0:
         raise NoHomeFound

@@ -1,7 +1,7 @@
 from homeassistant.core import HomeAssistant
 from . import HubConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from .hub import Hub, ChuGuanDevice
+from .chuguan.hub import Hub, ChuGuanDevice
 from homeassistant.components.light import LightEntity, ATTR_BRIGHTNESS, ColorMode, ATTR_COLOR_TEMP_KELVIN, ATTR_RGB_COLOR
 import logging
 import asyncio

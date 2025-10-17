@@ -1,9 +1,9 @@
-from .chuguan import ChuGuanHub
+from .brand import Brand
 from .model import HomeInfo, toHomeInfoList
 from .const import USER_URL
 
 
-class UserHub(ChuGuanHub):
+class UserHub(Brand):
     """User hub."""
     def __init__(self, brand: str, uuid: str, account: str, user_id: str) -> None:
         """Initialize."""

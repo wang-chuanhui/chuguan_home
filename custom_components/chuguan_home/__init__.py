@@ -6,7 +6,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 import logging
-from .hub import Hub
+from .chuguan.hub import Hub
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from .const import DOMAIN, CONF_BRAND, BRAND_TYPES, CONF_UUID, CONF_USER_ID, CONF_NICK_NAME, CONF_HOME_ID, CONF_HOME_NAME
 
@@ -31,7 +31,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry) -> bool:
     # TODO 5. Add the instance to hass.data
     hub = Hub(hass, entry.data[CONF_BRAND], entry.data[CONF_UUID], entry.data[CONF_USERNAME], entry.data[CONF_USER_ID], entry.data[CONF_HOME_ID])
     await hub.async_get_devices()
-    hub.register_areas()
     entry.runtime_data = hub
 
     _LOGGER.info("async_setup_entry with entry %s %s", entry, entry.data)

@@ -2,7 +2,7 @@
 import paho.mqtt.client as mqtt
 import logging
 import json
-from .eventemitter import EventEmitter
+from .event_emitter import EventEmitter
 
 _LOGGER = logging.getLogger(__name__)
 
