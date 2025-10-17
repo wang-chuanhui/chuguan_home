@@ -34,6 +34,9 @@ class ChuGuanLight(LightEntity):
         self._attr_max_color_temp_kelvin = 5000
         self._attr_unique_id = f"{self._device.device_id}_light"
         self._attr_name = self._device.device_name
+        if self._device.has_state == False:
+            self._attr_assumed_state = True
+            self._attr_should_poll = False
         self._device.on('state_update', self._on_state_update)
 
     def __del__(self):
@@ -43,11 +46,13 @@ class ChuGuanLight(LightEntity):
     def _on_state_update(self, state: dict):
         """On state update"""
         self.hass.loop.call_soon_threadsafe(self.async_write_ha_state)
-
+    
     @property
-    def device_info(self) -> dict:
-        """Information about this entity/device."""
-        return self._device.device_info
+    def icon(self):
+        if self.is_on:
+            return 'mdi:lightbulb-on'
+        else:
+            return 'mdi:lightbulb'
 
     @property
     def is_on(self) -> bool:

@@ -91,6 +91,11 @@ class ChuGuanDevice(EventEmitter):
         self._id = self.device_id
         self.name = self.device_name
         _LOGGER.info('Add device %s %s %s %s', self.device_type, self.device_id, self.zone, self.device_name)
+        hardware_name = self.hardware_name
+        if hardware_name.startswith('cg') or hardware_name.startswith('智能'):
+            self.has_state = True
+        else:
+            self.has_state = False
 
     def __del__(self):
         """Stop device"""
@@ -99,6 +104,12 @@ class ChuGuanDevice(EventEmitter):
     def stop(self):
         self.off()
         self.hub = None
+
+    def setup_entity(self, entity):
+        """Setup entity"""
+        if self.has_state == False:
+            entity._attr_assumed_state = True
+            entity._attr_should_poll = False
 
     @property
     def device_info(self) -> dict:
@@ -164,6 +175,11 @@ class ChuGuanDevice(EventEmitter):
     def zone(self) -> str | None:
         """Zone"""
         return self.device.get('zone', None)
+    
+    @property
+    def hardware_name(self) -> str:
+        """Hardware name"""
+        return self.device.get('extensions', {}).get('hardwareName', '')
     
     async def set_powerstate(self, value: bool):
         """Set power state"""

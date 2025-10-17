@@ -34,7 +34,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry) -> bool:
     hub.register_areas()
     entry.runtime_data = hub
 
-    # _LOGGER.info("async_setup_entry with entry %s %s", entry, entry.data)
+    _LOGGER.info("async_setup_entry with entry %s %s", entry, entry.data)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
