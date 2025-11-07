@@ -47,3 +47,9 @@ class ModeValue:
 	AirerFengGan = Mode("CLOTHES_RACK", "MUTE")
 	AirerLight = Mode("CLOTHES_RACK", "LIGHTING")
 	
+	AirCool: Mode = Mode("AIR_CONDITION", "COOL")
+	AirHeat: Mode = Mode("AIR_CONDITION", "HEAT")
+	AirFan: Mode = Mode("AIR_CONDITION", "FAN")
+	AirChuShi: Mode = Mode("AIR_CONDITION", "DEHUMIDIFICATION")
+	AirAuto: Mode = Mode("AIR_CONDITION", "AUTO")
+	

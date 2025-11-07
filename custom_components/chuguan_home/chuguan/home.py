@@ -150,3 +150,11 @@ class HomeHub(UserHub):
         result = await self.control(device, "UnsetModeRequest", { 'mode': mode})
         return result
 
+    async def set_fan_speed(self, device : dict, speed : str):
+        """'high' | 'middle' | 'low' | 'auto'"""
+        result = await self.control(device, 'SetFanSpeedRequest', { "fanSpeed": { "level": speed } })
+        return result
+    
+
+    async def set_temperature(self, device : dict, temp : float):
+        return await self.control(device, 'SetTemperatureRequest', { "targetTemperature": { "value": temp, "scale": "CELSIUS" } })

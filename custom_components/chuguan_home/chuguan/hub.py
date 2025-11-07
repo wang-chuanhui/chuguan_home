@@ -47,7 +47,7 @@ class Hub:
         """Get devices"""
         devices = await self._home_hub.get_devices()
         _LOGGER.info("Get devices %s", devices)
-        self.devices = [ChuGuanDevice(device, self._home_hub) for device in devices]
+        self.devices = [ChuGuanDevice(device, self._home_hub, self.get_state(device.get('deviceId'))) for device in devices]
         return devices
 
 
@@ -61,12 +61,21 @@ class Hub:
         coro = self._home_hub.refresh_home_devices_state()
         sync_non_blocking(coro)
 
+    def get_state(self, id: str) -> dict:
+        """Get state"""
+        if id is None:
+            return {}
+        state = self._states.get(id, None)
+        if state is None:
+            state = {}
+            self._states[id] = state
+        return state
+
     def on_message(self, id: str, params: dict):
         """On message"""
         _LOGGER.info(f"id: {id}, params: {params}")
-        state = self._states.get(id, {})
+        state = self.get_state(id)
         state.update(params)
-        self._states[id] = state
         
         for device in self.devices:
             if device.device_id == id:

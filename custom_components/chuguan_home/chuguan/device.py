@@ -6,10 +6,11 @@ from .const import DOMAIN
 class ChuGuanDevice(EventEmitter):
     """Chuguan Device"""
 
-    state: dict = {}
+    state: dict
 
-    def __init__(self, device: dict, home: HomeHub):
+    def __init__(self, device: dict, home: HomeHub, state: dict = {}):
         super().__init__()
+        self.state = state
         self.device = device
         self.home = home
         hardware_name = self.hardware_name
@@ -21,6 +22,10 @@ class ChuGuanDevice(EventEmitter):
             self.is_lora = True
         else:
             self.is_lora = False
+        if hardware_name == '49152':
+            self.is_ir = True
+        else:
+            self.is_ir = False
 
     def stop(self):
         self.off()
@@ -138,3 +143,9 @@ class ChuGuanDevice(EventEmitter):
     
     async def unset_mode(self, mode: Mode):
         return await self.home.unset_mode(self.device, mode)
+    
+    async def set_fan_speed(self, speed: str):
+        return await self.home.set_fan_speed(self.device, speed)
+    
+    async def set_temperature(self, temp: float):
+        return await self.home.set_temperature(self.device, temp)
