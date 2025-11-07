@@ -3,6 +3,7 @@ from .const import USER_URL, THIRD_URL, DEVICE_URL
 import logging
 import uuid
 from .utils import post_json
+from .model import Mode
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,8 +34,27 @@ class HomeHub(UserHub):
             'action': '307', 
             'actionType': 'GetWeCheatHomeSupportDevice'
         }
-        result = await self.post_data(USER_URL, data)
+        result: list = await self.post_data(USER_URL, data)
+        tcp_devices = await self.get_tcp_devices()
+        yuba_devices = self.get_yuba_devices(tcp_devices)
+        _LOGGER.info(f"Get YUBA devices result: {yuba_devices}")
+        result.extend(yuba_devices)
         return result
+    
+    def get_yuba_devices(self, devices: any):
+        """Get yuba devices"""
+        yuba_devices = []
+        for device in devices:
+            if device.get('hardwareName') == 'yuba':
+                id = device.get('hardwareId', None)
+                name = device.get('hardwareNickname', None)
+                brand = device.get('hardwareBrand', None)
+                room = device.get('hardwareRoom', None)
+                type = device.get('hardwareType', None)
+                rf = device.get('hardwareRFAddress', None)
+                device = {'deviceId': id, 'deviceType': 'YUBA', 'deviceName': name, 'brand': brand, 'zone': room, 'icon': '', 'properties': [], 'actions': [], 'extensions': {'isHost': True, 'type': type, 'hardwareRFAddress': rf, 'hardwareBindHostAddress': None, 'hardwareBindHostId': None, 'parentId': None, 'hardwareName': 'yuba'}}
+                yuba_devices.append(device)
+        return yuba_devices
     
     async def get_tcp_devices(self):
         """Get tcp devices"""
@@ -88,6 +108,14 @@ class HomeHub(UserHub):
             name = 'TurnOffRequest'
         result = await self.control(device, name, {})
         return result
+    
+    async def set_function_powerstate(self, device: dict, function: str, value: bool):
+        if value:
+            name = 'TurnOnRequest'
+        else:
+            name = 'TurnOffRequest'
+        result = await self.control(device, name, {'function': function})
+        return result
 
     async def set_brightness(self, device: dict, brightness: int):
         payload = { "brightness": { "value": brightness } }
@@ -111,3 +139,14 @@ class HomeHub(UserHub):
     async def set_pause(self, device: dict):
         result = await self.control(device, "PauseRequest", {})
         return result
+    
+    async def set_mode(self, device: dict, mode: Mode):
+        """Set mode"""
+        result = await self.control(device, "SetModeRequest", { 'mode': mode})
+        return result
+    
+    async def unset_mode(self, device: dict, mode: Mode):
+        """Unset mode"""
+        result = await self.control(device, "UnsetModeRequest", { 'mode': mode})
+        return result
+

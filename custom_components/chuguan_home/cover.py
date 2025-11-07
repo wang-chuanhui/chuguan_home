@@ -16,9 +16,9 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry, async_add_entities: AddEntitiesCallback):
     """Set up the Chuguan Home switch platform."""
     hub = entry.runtime_data
-    new_devices : list[ChuGuanSwitch]= []
+    new_devices : list[ChuGuanCover]= []
     for device in hub.devices:
-        if device.device_type == 'curtain':
+        if device.device_type == 'curtain' or device.device_type == 'HANGER' or device.device_type == 'window':
             new_devices.append(ChuGuanCover(device))
     async_add_entities(new_devices)
     ChuGuanEntity.register_entity_areas(hass, new_devices)
@@ -27,13 +27,19 @@ class ChuGuanCover(ChuGuanEntity, CoverEntity):
     """Chuguan Cover"""
 
     suffix: str = "cover"
+    isHanger: bool = False
 
     def __init__(self, device: ChuGuanDevice):
         super().__init__(device)
+        self._attr_device_class = CoverDeviceClass.CURTAIN
         if self._device.hardware_name == "Rols_ctler":
             self._attr_device_class = CoverDeviceClass.SHUTTER
-        else:
-            self._attr_device_class = CoverDeviceClass.CURTAIN
+        if self._device.device_type == 'HANGER':
+            self._attr_device_class = CoverDeviceClass.SHUTTER
+            self.isHanger = True
+            self._attr_device_info = self._device.device_info
+        if self._device.device_type == 'window':
+            self._attr_device_class = CoverDeviceClass.WINDOW
 
     def _on_state_changed(self, state: dict):
         super()._on_state_changed(state)
@@ -60,6 +66,8 @@ class ChuGuanCover(ChuGuanEntity, CoverEntity):
         position = self._device.position
         if position is None:
             return None
+        if self.isHanger:
+            return position >= 99
         return position <= 1
 
     @property
@@ -67,6 +75,8 @@ class ChuGuanCover(ChuGuanEntity, CoverEntity):
         if self._device.has_state == False:
             if self.second_of_last_update() > 2:
                 return False
+        if self.isHanger:
+            return self._device.int_powerstate == 1
         return self._device.int_powerstate == 0
     
     @property
@@ -74,17 +84,25 @@ class ChuGuanCover(ChuGuanEntity, CoverEntity):
         if self._device.has_state == False:
             if self.second_of_last_update() > 2:
                 return False
+        if self.isHanger:
+            return self._device.int_powerstate == 0
         return self._device.int_powerstate == 1
 
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
         _LOGGER.info("async_open_cover %s", kwargs)
-        await self._device.set_powerstate(True)
+        if self.isHanger:
+            await self._device.set_powerstate(False)
+        else:
+            await self._device.set_powerstate(True)
     
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
         _LOGGER.info("async_close_cover %s", kwargs)
-        await self._device.set_powerstate(False)
+        if self.isHanger:
+            await self._device.set_powerstate(True)
+        else:
+            await self._device.set_powerstate(False)
 
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""

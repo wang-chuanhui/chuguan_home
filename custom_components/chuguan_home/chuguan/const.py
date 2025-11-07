@@ -1,6 +1,7 @@
 """Constants for the chuguan_home integration."""
 from typing import Final
 
+DOMAIN = "chuguan_home"
 BASE_URL: Final = "https://www.chuguansmart.com"
 USER_URL: Final = f"{BASE_URL}/api/NewUserHandler.ashx"
 DEVICE_URL: Final = f"{BASE_URL}/Api/NewDeviceHandler.ashx"

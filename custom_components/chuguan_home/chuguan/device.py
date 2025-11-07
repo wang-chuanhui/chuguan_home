@@ -1,6 +1,7 @@
 from .event_emitter import EventEmitter
 from .home import HomeHub
-
+from .model import Mode
+from .const import DOMAIN
 
 class ChuGuanDevice(EventEmitter):
     """Chuguan Device"""
@@ -12,10 +13,14 @@ class ChuGuanDevice(EventEmitter):
         self.device = device
         self.home = home
         hardware_name = self.hardware_name
-        if hardware_name.startswith('cg') or hardware_name.startswith('智能') or hardware_name.startswith('二代'):
+        if hardware_name.startswith('cg') or hardware_name.startswith('智能') or hardware_name == 'yuba' or hardware_name == 'rgb_light':
             self.has_state = True
         else:
             self.has_state = False
+        if hardware_name.startswith('二代'):
+            self.is_lora = True
+        else:
+            self.is_lora = False
 
     def stop(self):
         self.off()
@@ -28,8 +33,8 @@ class ChuGuanDevice(EventEmitter):
             "identifiers": {(DOMAIN, self.device_id)},
             # If desired, the name for the device could be different to the entity
             "name": self.device_name,
-            "model": self.hub._home_hub.brand,
-            "manufacturer": self.hub._home_hub.brand,
+            "model": self.home.brand,
+            "manufacturer": self.home.brand,
         }
         if self.zone is not None:
             res.update({
@@ -97,9 +102,21 @@ class ChuGuanDevice(EventEmitter):
         """Hardware name"""
         return self.device.get('extensions', {}).get('hardwareName', '')
     
+    @property
+    def hardware_type(self) -> str:
+        """Hardware type"""
+        return self.device.get('extensions', {}).get('type', '')
+    
     async def set_powerstate(self, value: bool):
         """Set power state"""
+        if (self.is_lora):
+            self.state['powerstate'] = 1 if value else 0
+            self.update_state(self.state)
         return await self.home.set_powerstate(self.device, value)
+    
+    async def set_function_powerstate(self, function: str, value: bool):
+        """Set function power state"""
+        return await self.home.set_function_powerstate(self.device, function, value)
     
     async def set_brightness(self, value: int):
         return await self.home.set_brightness(self.device, value)
@@ -115,3 +132,9 @@ class ChuGuanDevice(EventEmitter):
     
     async def set_pause(self):
         return await self.home.set_pause(self.device)
+    
+    async def set_mode(self, mode: Mode):
+        return await self.home.set_mode(self.device, mode)
+    
+    async def unset_mode(self, mode: Mode):
+        return await self.home.unset_mode(self.device, mode)

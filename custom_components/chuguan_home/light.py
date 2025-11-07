@@ -5,7 +5,8 @@ from .chuguan.hub import Hub, ChuGuanDevice
 from homeassistant.components.light import LightEntity, ATTR_BRIGHTNESS, ColorMode, ATTR_COLOR_TEMP_KELVIN, ATTR_RGB_COLOR
 import logging
 import asyncio
-from .entity import ChuGuanEntity
+from .entity import ChuGuanEntity, ChuGuanModeEntity, ChuGuanFunctionEntity
+from .chuguan.model import ModeValue
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -16,6 +17,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry, async_ad
     for device in hub.devices:
         if device.device_type == 'light_wy' or device.device_type == 'light_rgb' or device.device_type == 'light':
             new_devices.append(ChuGuanLight(device))
+        if device.device_type == 'HANGER' and device.has_state:
+            new_devices.append(ChuGuanModeLight(device, ModeValue.AirerLight, 'illumination', "照明"))
+        if device.device_type == 'YUBA':
+            new_devices.append(ChuGuanFunctionLight(device, 'lighting', 'illumination', "照明"))
     async_add_entities(new_devices)
     ChuGuanEntity.register_entity_areas(hass, new_devices)
 
@@ -81,3 +86,10 @@ class ChuGuanLight(ChuGuanEntity, LightEntity):
     async def async_turn_off(self):
         """Turn the light off."""
         await self._device.set_powerstate(False)
+
+
+class ChuGuanModeLight(ChuGuanModeEntity, LightEntity):
+    """Chuguan Light Mode"""
+
+class ChuGuanFunctionLight(ChuGuanFunctionEntity, LightEntity):
+    """Chuguan Function Light"""
