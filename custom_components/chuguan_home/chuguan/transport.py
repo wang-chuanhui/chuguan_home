@@ -3,6 +3,7 @@ import paho.mqtt.client as mqtt
 import logging
 import json
 from .event_emitter import EventEmitter
+from homeassistant.util.ssl import get_default_context  # 官方提供的异步安全 SSL 上下文创建工具
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,7 +23,10 @@ class Transport(EventEmitter):
         self._client.on_message = self.on_message
         self._client.on_disconnect = self.on_disconnect
         self._client.ws_set_options(path="/mqtt")
-        self._client.tls_set()
+        # self._client.tls_set()
+        # 关键修改：用官方工具创建 SSL 上下文（自动在 executor 中加载证书）
+        ssl_context = get_default_context()  # 内部已处理阻塞 I/O，安全运行在异步环境
+        self._client.tls_set_context(ssl_context)  # 使用创建好的上下文，避免直接调用 tls_set()
         self._client.username_pw_set(account, account)
         self.connect()
 

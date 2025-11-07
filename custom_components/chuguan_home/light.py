@@ -39,12 +39,12 @@ class ChuGuanLight(ChuGuanEntity, LightEntity):
         self._attr_min_color_temp_kelvin = 2200
         self._attr_max_color_temp_kelvin = 5000
     
-    @property
-    def icon(self):
-        if self.is_on:
-            return 'mdi:lightbulb-on'
-        else:
-            return 'mdi:lightbulb'
+    # @property
+    # def icon(self):
+    #     if self.is_on:
+    #         return 'mdi:lightbulb-on'
+    #     else:
+    #         return 'mdi:lightbulb'
 
     @property
     def is_on(self) -> bool:
@@ -91,5 +91,16 @@ class ChuGuanLight(ChuGuanEntity, LightEntity):
 class ChuGuanModeLight(ChuGuanModeEntity, LightEntity):
     """Chuguan Light Mode"""
 
+
+    def __init__(self, device, mode, key, name):
+        super().__init__(device, mode, key, name)
+        self._attr_supported_color_modes = {ColorMode.ONOFF}
+
+
+
 class ChuGuanFunctionLight(ChuGuanFunctionEntity, LightEntity):
     """Chuguan Function Light"""
+
+    def __init__(self, device, function, key, name):
+        super().__init__(device, function, key, name)
+        self._attr_supported_color_modes = {ColorMode.ONOFF}
