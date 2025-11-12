@@ -1,6 +1,7 @@
 from .chuguan.device import ChuGuanDevice
 from homeassistant.helpers.entity import Entity
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import async_get as async_get_device_registry
 from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 from homeassistant.helpers.area_registry import async_get as async_get_area_registry
 import logging
@@ -38,10 +39,19 @@ class ChuGuanEntity(Entity):
         """Register entity areas"""
         entity_registry = async_get_entity_registry(hass)
         area_registry = async_get_area_registry(hass)
+        device_registry = async_get_device_registry(hass)
         for entity in entities:
-            area = area_registry.async_get_or_create(name=entity._device.zone)
-            entity_registry.async_update_entity(entity.entity_id, area_id=area.id)
-            _LOGGER.info(f"Add entity {entity.entity_id} to area {area.id} {area.name}")
+            device = entity.device_info
+            if device and device.get("identifiers", None):
+                get_device = device_registry.async_get_device(device.get("identifiers"))
+                if get_device and get_device.area_id is None:
+                    device_registry.async_update_device(get_device.id, area_id=area.id)
+                    _LOGGER.info(f"Add device {get_device.id} to area {area.id} {area.name}")
+            get_entity = entity_registry.async_get(entity.entity_id)
+            if get_entity and get_entity.area_id is None:
+                area = area_registry.async_get_or_create(name=entity._device.zone)
+                entity_registry.async_update_entity(entity.entity_id, area_id=area.id)
+                _LOGGER.info(f"Add entity {entity.entity_id} to area {area.id} {area.name}")
 
 
 class ChuGuanModeEntity(ChuGuanEntity):
