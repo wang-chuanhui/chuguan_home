@@ -46,7 +46,7 @@ class Hub:
     async def async_get_devices(self):
         """Get devices"""
         devices = await self._home_hub.get_devices()
-        _LOGGER.info("Get devices %s", devices)
+        # _LOGGER.info("Get devices %s", devices)
         self.devices = [ChuGuanDevice(device, self._home_hub, self.get_state(device.get('deviceId'))) for device in devices]
         return devices
 

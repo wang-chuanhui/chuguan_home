@@ -31,11 +31,15 @@ class ChuGuanLight(ChuGuanEntity, LightEntity):
 
     def __init__(self, device: ChuGuanDevice):
         super().__init__(device)
+        self._attr_device_info = self._device.parent_info or self._device.device_info
         self._attr_supported_color_modes = {ColorMode.ONOFF}
+        self._attr_color_mode = ColorMode.ONOFF
         if self._device.device_type == "light_wy":
-            self._attr_supported_color_modes = {ColorMode.BRIGHTNESS, ColorMode.ONOFF, ColorMode.COLOR_TEMP}
+            self._attr_supported_color_modes = {ColorMode.COLOR_TEMP}
+            self._attr_color_mode = ColorMode.COLOR_TEMP
         elif self._device.device_type == "light_rgb":
-            self._attr_supported_color_modes = {ColorMode.BRIGHTNESS, ColorMode.ONOFF, ColorMode.RGB}
+            self._attr_supported_color_modes = {ColorMode.RGB}
+            self._attr_color_mode = ColorMode.RGB
         self._attr_min_color_temp_kelvin = 2200
         self._attr_max_color_temp_kelvin = 5000
     
@@ -95,6 +99,7 @@ class ChuGuanModeLight(ChuGuanModeEntity, LightEntity):
     def __init__(self, device, mode, key, name):
         super().__init__(device, mode, key, name)
         self._attr_supported_color_modes = {ColorMode.ONOFF}
+        self._attr_color_mode = ColorMode.ONOFF
 
 
 
@@ -104,3 +109,4 @@ class ChuGuanFunctionLight(ChuGuanFunctionEntity, LightEntity):
     def __init__(self, device, function, key, name):
         super().__init__(device, function, key, name)
         self._attr_supported_color_modes = {ColorMode.ONOFF}
+        self._attr_color_mode = ColorMode.ONOFF

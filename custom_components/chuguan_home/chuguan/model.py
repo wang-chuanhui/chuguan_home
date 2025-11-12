@@ -26,6 +26,13 @@ class HomeInfo:
 	HomeId: str
 	HomeName: str
 
+@dataclass
+class HardwareInfo:
+	id: str
+	nickname: str
+	room: str
+	brand: str
+
 def toHomeInfo(dic: dict):
 	return HomeInfo(dic['HomeId'], dic['HomeName'])
 

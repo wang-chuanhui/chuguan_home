@@ -32,6 +32,7 @@ class ChuGuanCover(ChuGuanEntity, CoverEntity):
     def __init__(self, device: ChuGuanDevice):
         super().__init__(device)
         self._attr_device_class = CoverDeviceClass.CURTAIN
+        self._attr_device_info = self._device.parent_info or self._device.device_info
         if self._device.hardware_name == "Rols_ctler":
             self._attr_device_class = CoverDeviceClass.SHUTTER
         if self._device.device_type == 'HANGER':

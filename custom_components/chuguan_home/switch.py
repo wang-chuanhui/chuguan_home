@@ -35,6 +35,7 @@ class ChuGuanSwitch(ChuGuanEntity, SwitchEntity):
 
     def __init__(self, device: ChuGuanDevice):
         super().__init__(device)
+        self._attr_device_info = self._device.parent_info or self._device.device_info
         if self._device.device_type == 'outlet':
             self._attr_device_class = SwitchDeviceClass.OUTLET
 

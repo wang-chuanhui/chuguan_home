@@ -3,7 +3,7 @@ from .const import USER_URL, THIRD_URL, DEVICE_URL
 import logging
 import uuid
 from .utils import post_json
-from .model import Mode
+from .model import Mode, HardwareInfo
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -13,7 +13,9 @@ class HomeHub(UserHub):
     def __init__(self, brand: str, uuid: str, account: str, user_id: str, home_id: str):
         super().__init__(brand, uuid, account, user_id)
         self.home_id = home_id
-
+        self.devices = []
+        self.tcp_devices = []
+        self.mq_devices = []
 
     def update_payload(self, payload: dict):
         super().update_payload(payload)
@@ -37,8 +39,14 @@ class HomeHub(UserHub):
         result: list = await self.post_data(USER_URL, data)
         tcp_devices = await self.get_tcp_devices()
         yuba_devices = self.get_yuba_devices(tcp_devices)
-        _LOGGER.info(f"Get YUBA devices result: {yuba_devices}")
+        # _LOGGER.info(f"Get YUBA devices result: {yuba_devices}")
         result.extend(yuba_devices)
+        self.devices = result
+        self.tcp_devices = tcp_devices
+        self.mq_devices = await self.get_mq_devices()
+        # _LOGGER.info(f"Get devices result: {result}")
+        # _LOGGER.info(f"Get tcp devices result: {tcp_devices}")
+        # _LOGGER.info(f"Get mq devices result: {self.mq_devices}")
         return result
     
     def get_yuba_devices(self, devices: any):
@@ -72,6 +80,22 @@ class HomeHub(UserHub):
         }
         result = await self.post_data(DEVICE_URL, data)
         return result
+    
+    def get_hardware_info(self, id: str) -> HardwareInfo | None:
+        """Get hardware info"""
+        for device in self.tcp_devices:
+            if device.get('hardwareId') == id:
+                nickname = device.get('hardwareNickname', None)
+                room = device.get('hardwareRoom', None)
+                brand = device.get('hardwareBrand', None)
+                return HardwareInfo(id, nickname, room, brand)
+        for device in self.mq_devices:
+            if device.get('hardwareId') == id:
+                nickname = device.get('hardwareNickname', None)
+                room = device.get('hardwareRoom', None)
+                brand = device.get('Brand', None)
+                return HardwareInfo(id, nickname, room, brand)
+        return None
 
     async def choose_home(self):
         """Choose home"""

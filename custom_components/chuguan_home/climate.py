@@ -34,6 +34,7 @@ class ChuGuanAirConditioner(ChuGuanEntity, ClimateEntity):
         self._attr_max_temp = 30
         self._attr_min_temp = 16
         self._attr_target_temperature_step = 1
+        self._attr_device_info = self._device.parent_info
         if self._device.is_ir:
             self._attr_fan_modes = [FAN_AUTO, FAN_LOW, FAN_MEDIUM, FAN_HIGH]
             self._attr_hvac_modes = [HVACMode.HEAT, HVACMode.COOL, HVACMode.AUTO, HVACMode.FAN_ONLY, HVACMode.DRY, HVACMode.OFF]

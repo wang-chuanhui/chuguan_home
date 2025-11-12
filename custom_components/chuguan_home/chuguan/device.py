@@ -26,24 +26,59 @@ class ChuGuanDevice(EventEmitter):
             self.is_ir = True
         else:
             self.is_ir = False
+        self.device_info = self.get_device_info()
+        self.parent_info = self.get_parent_info()
 
     def stop(self):
         self.off()
         self.home = None
 
-    @property
-    def device_info(self) -> dict:
+    def translate_brand(self, brand: str) -> str:
+        if brand == 'cg':
+            return '初冠'
+        if brand == 'xzh':
+            return '小智慧'
+        return brand
+
+    def get_device_info(self) -> dict:
         """Information about this entity/device."""
         res: dict = {
             "identifiers": {(DOMAIN, self.device_id)},
             # If desired, the name for the device could be different to the entity
             "name": self.device_name,
-            "model": self.home.brand,
-            "manufacturer": self.home.brand,
+            # "model": self.translate_brand(self.home.brand),
+            "manufacturer": self.translate_brand(self.home.brand),
         }
         if self.zone is not None:
             res.update({
                 "suggested_area": self.zone,
+            })
+        return res
+    
+    def get_parent_info(self) -> dict | None:
+        """Information about this entity/device."""
+        extensions = self.extensions
+        rf = extensions.get('hardwareRFAddress', None)
+        if rf == 'BT':
+            hardwareName = self.hardware_name
+            if hardwareName.startswith('cgbt-child') == False:
+                return None
+        parent_id = self.parent_id
+        if parent_id is None:
+            return None
+        hardware_info = self.home.get_hardware_info(parent_id)
+        if hardware_info is None:
+            return None
+        res: dict = {
+            "identifiers": {(DOMAIN, parent_id)},
+            # If desired, the name for the device could be different to the entity
+            "name": hardware_info.nickname,
+            # "model": self.translate_brand(hardware_info.brand),
+            "manufacturer": self.translate_brand(hardware_info.brand),
+        }
+        if hardware_info.room is not None:
+            res.update({
+                "suggested_area": hardware_info.room,
             })
         return res
 
@@ -103,14 +138,24 @@ class ChuGuanDevice(EventEmitter):
         return self.device.get('zone', None)
     
     @property
+    def extensions(self) -> dict:
+        """Extensions"""
+        return self.device.get('extensions', {})
+    
+    @property
     def hardware_name(self) -> str:
         """Hardware name"""
-        return self.device.get('extensions', {}).get('hardwareName', '')
+        return self.extensions.get('hardwareName', '')
     
     @property
     def hardware_type(self) -> str:
         """Hardware type"""
-        return self.device.get('extensions', {}).get('type', '')
+        return self.extensions.get('type', '')
+    
+    @property
+    def parent_id(self) -> str | None:
+        """Parent id"""
+        return self.extensions.get('parentId', None)
     
     async def set_powerstate(self, value: bool):
         """Set power state"""
