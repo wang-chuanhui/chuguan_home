@@ -38,7 +38,7 @@ class ChuGuanLight(ChuGuanEntity, LightEntity):
             self._attr_supported_color_modes = {ColorMode.COLOR_TEMP}
             self._attr_color_mode = ColorMode.COLOR_TEMP
         elif self._device.device_type == "light_rgb":
-            self._attr_supported_color_modes = {ColorMode.RGB}
+            self._attr_supported_color_modes = {ColorMode.RGB, ColorMode.BRIGHTNESS, ColorMode.ONOFF}
             self._attr_color_mode = ColorMode.RGB
         self._attr_min_color_temp_kelvin = 2200
         self._attr_max_color_temp_kelvin = 5000

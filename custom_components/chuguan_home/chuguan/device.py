@@ -104,7 +104,8 @@ class ChuGuanDevice(EventEmitter):
     
     @property
     def rgb(self) -> tuple[int, int, int]:
-        res: dict = self.state.get('rgb', {'Red': 255, 'Green': 255, 'Blue': 255})
+        res: dict = self.state.get('RGBColor', {'Red': 255, 'Green': 255, 'Blue': 255})
+        print(res, res.values(), tuple(res.values()))
         return tuple(res.values())
     @property
     def position(self) -> int | None:
