@@ -11,3 +11,11 @@ class InvalidAuth(HomeAssistantError):
 
 class NoHomeFound(HomeAssistantError):
     """Error to indicate no home found."""
+
+class CGError(Exception):
+    """Error to indicate chuguan home error."""
+    code: str
+    message: str
+    def __init__(self, code: str, message: str):
+        self.code = code
+        self.message = message

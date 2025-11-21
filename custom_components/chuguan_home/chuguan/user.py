@@ -5,9 +5,9 @@ from .const import USER_URL
 
 class UserHub(Brand):
     """User hub."""
-    def __init__(self, brand: str, uuid: str, account: str, user_id: str) -> None:
+    def __init__(self, brand: str, uuid: str, province: str, account: str, user_id: str) -> None:
         """Initialize."""
-        super().__init__(brand, uuid)
+        super().__init__(brand, uuid, province)
         self.account = account
         self.user_id = user_id
 
@@ -18,7 +18,8 @@ class UserHub(Brand):
             })
         if self.user_id is not None:
             payload.update({
-                'wxUserId': self.user_id
+                # 'wxUserId': self.user_id,
+                # 'userId': self.user_id
             })
         super().update_payload(payload)
     

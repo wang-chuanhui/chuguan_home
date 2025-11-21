@@ -28,7 +28,9 @@ class SetInterval:
     def start(self):
         """启动定时器（类似 Node.js 的 setInterval 调用）"""
         if not self.is_running:
-            self._run()
+            # self._run()
+            self.timer = threading.Timer(self.interval, self._run)
+            self.timer.start()
 
     def pause(self):
         """停止定时器（类似 Node.js 的 clearInterval）"""

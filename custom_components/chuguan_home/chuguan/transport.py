@@ -4,6 +4,7 @@ import logging
 import json
 from .event_emitter import EventEmitter
 from homeassistant.util.ssl import get_default_context  # 官方提供的异步安全 SSL 上下文创建工具
+from .const import MQTT_IS_SSL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -16,17 +17,18 @@ class Transport(EventEmitter):
         self._port = port
         self._client_id = user_id.lower()
         _LOGGER.info(f"self._client_id: {self._client_id}, account: {account}")
-        self._client = mqtt.Client(client_id=self._client_id, clean_session=True, transport="websockets")
+        self._client = mqtt.Client(client_id=self._client_id, clean_session=True, transport="websockets", reconnect_on_failure=False)
         self._client.on_connect = self.on_connect
         self._client.on_connect_fail = self.on_connect_fail
         self._client.on_subscribe = self.on_subscribe
         self._client.on_message = self.on_message
         self._client.on_disconnect = self.on_disconnect
         self._client.ws_set_options(path="/mqtt")
-        # self._client.tls_set()
-        # 关键修改：用官方工具创建 SSL 上下文（自动在 executor 中加载证书）
-        ssl_context = get_default_context()  # 内部已处理阻塞 I/O，安全运行在异步环境
-        self._client.tls_set_context(ssl_context)  # 使用创建好的上下文，避免直接调用 tls_set()
+        if MQTT_IS_SSL:
+            # self._client.tls_set()
+            # 关键修改：用官方工具创建 SSL 上下文（自动在 executor 中加载证书）
+            ssl_context = get_default_context()  # 内部已处理阻塞 I/O，安全运行在异步环境
+            self._client.tls_set_context(ssl_context)  # 使用创建好的上下文，避免直接调用 tls_set()
         self._client.username_pw_set(account, account)
         self.connect()
 
@@ -93,7 +95,7 @@ class Transport(EventEmitter):
         """断开连接回调方法"""
         self._connected = False
         _LOGGER.info(f"与服务器断开连接，代码: {rc}")
-        if rc != 0:
+        if rc != 0 and rc != 7:
             _LOGGER.info("意外断开连接，尝试重连...")
             self.connect()
 

@@ -1,6 +1,6 @@
 import aiohttp
 import json
-from .error import InvalidAuth
+from .error import InvalidAuth, CGError
 import asyncio
 import threading
 import logging
@@ -39,15 +39,19 @@ async def submit_data(session: aiohttp.ClientSession, url: str, payload: dict):
             timeout=30
         ) as response:
             text = await response.text()
+            if response.status != 200:
+                _LOGGER.error(f"POST 错误: {response.status} {text}")
             result: dict = json.loads(text)
             result_code = result.get('resultCode', '10000')
             if result_code == '20000':
+                # _LOGGER.info(f"{url} {payload} {result}")
                 return result.get('resultData')
             if result_code == '10001':
+                _LOGGER.info(f"{url} {payload} {result}")
                 raise InvalidAuth("登录失效")
             message = result.get('message', '没有数据')
-            _LOGGER.info(f"{payload} {result}")
-            raise Exception(f"{result_code}, {message}")
+            _LOGGER.info(f"{url} {payload} {result}")
+            raise CGError(result_code, message)
     except aiohttp.ClientError as e:
         _LOGGER.error("POST 错误: %s", e)
         raise e;

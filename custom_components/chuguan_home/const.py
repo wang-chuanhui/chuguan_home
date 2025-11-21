@@ -12,4 +12,5 @@ CONF_USER_ID: Final = "user_id"
 CONF_NICK_NAME: Final = "nick_name"
 CONF_HOME_ID: Final = "home_id"
 CONF_HOME_NAME: Final = "home_name"
+CONF_PROVINCE: Final = "province"
 

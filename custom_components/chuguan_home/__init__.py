@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry, ConfigEntryAuthFailed
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 import logging
 from .chuguan.hub import Hub
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
-from .const import DOMAIN, CONF_BRAND, BRAND_TYPES, CONF_UUID, CONF_USER_ID, CONF_NICK_NAME, CONF_HOME_ID, CONF_HOME_NAME
+from .const import CONF_BRAND, CONF_UUID, CONF_USER_ID, CONF_HOME_ID, CONF_PROVINCE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,14 +31,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry) -> bool:
     # TODO 5. Add the instance to hass.data
     _LOGGER.info("async_setup_entry with entry %s %s", entry, entry.data)
 
-    hub = Hub(hass, entry.data[CONF_BRAND], entry.data[CONF_UUID], entry.data[CONF_USERNAME], entry.data[CONF_USER_ID], entry.data[CONF_HOME_ID])
-    await hub.async_get_devices()
-    entry.runtime_data = hub
-
-
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
-    return True
+    hub = Hub(hass, entry.data[CONF_BRAND], entry.data[CONF_UUID], entry.data[CONF_PROVINCE], entry.data[CONF_USERNAME], entry.data[CONF_USER_ID], entry.data[CONF_HOME_ID])
+    try:
+        await hub.async_get_devices()
+        try:
+            await hub.choose_home()
+        except Exception as e:
+            """Choose home failed"""
+        hub.setup_transport()
+        entry.runtime_data = hub
+        hub._entry_id = entry.entry_id
+        await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+        return True
+    except Exception as e:
+        hub.stop()
+        _LOGGER.error("async_get_devices failed %s", e)
+        raise ConfigEntryAuthFailed from e
 
 
 # TODO Update entry annotation

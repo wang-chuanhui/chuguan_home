@@ -1,6 +1,5 @@
 import logging
 from .const import USER_URL, PROVINCE
-from .error import InvalidAuth
 from .model import toUserInfoList, UserInfo
 from .utils import post_data
 
@@ -12,17 +11,23 @@ class Brand:
 
     brand: str
     uuid: str
+    province: str
 
-    def __init__(self, brand: str, uuid: str) -> None:
+    def __init__(self, brand: str, uuid: str, province: str) -> None:
         """Initialize."""
         self.brand = brand
         self.uuid = uuid
+        self.province = province
 
     def update_payload(self, payload: dict):
         payload.update({
             'register': self.brand,
-            'wxUnionid': self.uuid,
-            'province': PROVINCE + '1.0.0'
+            'userSign': self.uuid,
+            'userProvince': self.province,
+
+            # 'wxUnionid': self.uuid,
+            # 'province': PROVINCE + '1.0.0'
+
         })
 
     async def post_data(self, url: str, payload: dict):
@@ -33,8 +38,8 @@ class Brand:
     async def authenticate(self, username: str, password: str) -> UserInfo:
         """Test if we can authenticate with the brand."""
         data = {
-            'action': '307',
-            'actionType': 'WeChatLogin',
+            'action': '307_us',
+            'actionType': 'UserSignLogin',
             'account': username,
             'password': password
         }

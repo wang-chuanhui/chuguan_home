@@ -15,7 +15,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry, async_ad
     """Set up the Chuguan Home button platform."""
     hub = entry.runtime_data
     new_devices : list[ChuGuanAirConditioner]= []
-    _LOGGER.info("climate async_setup_entry with entry %s %s", entry, entry.data)
     for device in hub.devices:
         """Add"""
         if device.device_type == "aircondition":

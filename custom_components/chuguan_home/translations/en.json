@@ -22,6 +22,9 @@
                 "data": {
                     "home_id": "家庭"
                 }
+            }, 
+            "password": {
+                "password": "密码"
             }
         }
     },

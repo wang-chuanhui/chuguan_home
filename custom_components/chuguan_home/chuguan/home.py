@@ -10,8 +10,8 @@ _LOGGER = logging.getLogger(__name__)
 
 class HomeHub(UserHub):
     """HomeHub"""
-    def __init__(self, brand: str, uuid: str, account: str, user_id: str, home_id: str):
-        super().__init__(brand, uuid, account, user_id)
+    def __init__(self, brand: str, uuid: str, province: str, account: str, user_id: str, home_id: str):
+        super().__init__(brand, uuid, province, account, user_id)
         self.home_id = home_id
         self.devices = []
         self.tcp_devices = []
@@ -33,8 +33,8 @@ class HomeHub(UserHub):
     async def get_devices(self):
         """Get devices"""
         data = {
-            'action': '307', 
-            'actionType': 'GetWeCheatHomeSupportDevice'
+            'action': '307_us', 
+            'actionType': 'UserSignHomeSupportDevice'
         }
         result: list = await self.post_data(USER_URL, data)
         tcp_devices = await self.get_tcp_devices()
@@ -99,14 +99,14 @@ class HomeHub(UserHub):
 
     async def choose_home(self):
         """Choose home"""
-        data = {'action': '307', 'actionType': 'ChangeSelectionHome', 'homeId': self.home_id}
+        data = {'action': '307_us', 'actionType': 'UserSignChangeHome', 'homeId': self.home_id}
         result = await self.post_data(USER_URL, data)
         _LOGGER.info(f"Choose home {self.home_id} result: {result}")
         return result
 
     async def refresh_home_devices_state(self):
         """Refresh home devices state"""
-        data = {'action': '307', 'actionType': 'PleaseRefreshHomeDevice', 'homeId': self.home_id}
+        data = {'action': '307_us', 'actionType': 'UserSignRefreshHomeDevice', 'homeId': self.home_id}
         result = await self.post_data(USER_URL, data)
         _LOGGER.info(f"Refresh home devices state result: {result}")
         return result
