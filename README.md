@@ -24,4 +24,4 @@
 <!-- Repository References -->
 
 [releaseUrl]: https://github.com/wang-chuanhui/chuguan_home/releases/tag/v1.0.0
-[ChuGuanStrategyHacs]: https://my.home-assistant.io/redirect/hacs_repository/?owner=wang-chuanhui&repository=chuguan_home
+[ChuGuanStrategyHacs]: https://my.home-assistant.io/redirect/hacs_repository/?owner=wang-chuanhui&repository=chuguan_home&category=integration
