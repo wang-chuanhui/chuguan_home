@@ -1,6 +1,6 @@
 from .entity import ChuGuanEntity
 from homeassistant.components.climate import ClimateEntity
-from homeassistant.components.climate.const import FAN_AUTO, FAN_LOW, FAN_MEDIUM, FAN_HIGH, HVACMode, ClimateEntityFeature, SWING_VERTICAL
+from homeassistant.components.climate.const import FAN_AUTO, FAN_LOW, FAN_MEDIUM, FAN_HIGH, HVACMode, HVACAction, ClimateEntityFeature, SWING_VERTICAL
 from .chuguan.device import ChuGuanDevice
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -65,7 +65,31 @@ class ChuGuanAirConditioner(ChuGuanEntity, ClimateEntity):
         return HVACMode.OFF
     
     @property
+    def hvac_action(self) -> HVACAction | None:
+        """Return the current hvac action."""
+        powerstate = self._device.powerstate
+        if powerstate == False:
+            return HVACAction.OFF
+        mode: int = self._device.state.get('mode', None)
+        if mode == 2:
+            return HVACAction.COOLING
+        if mode == 5:
+            return HVACAction.HEATING
+        if mode == 1:
+            return None
+        if mode == 3:
+            return HVACAction.DRYING
+        if mode == 4:
+            return HVACAction.FAN
+        return HVACAction.OFF
+    
+    @property
     def target_temperature(self) -> float:
+        """Return the current temperature."""
+        return self._device.state.get('temperature', None)
+    
+    @property
+    def current_temperature(self) -> float | None:
         """Return the current temperature."""
         return self._device.state.get('temperature', None)
 

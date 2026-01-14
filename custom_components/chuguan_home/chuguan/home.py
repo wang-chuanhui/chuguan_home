@@ -39,8 +39,10 @@ class HomeHub(UserHub):
         result: list = await self.post_data(USER_URL, data)
         tcp_devices = await self.get_tcp_devices()
         yuba_devices = self.get_yuba_devices(tcp_devices)
+        valve_devices = self.get_valve_devices(tcp_devices)
         # _LOGGER.info(f"Get YUBA devices result: {yuba_devices}")
         result.extend(yuba_devices)
+        result.extend(valve_devices)
         self.devices = result
         self.tcp_devices = tcp_devices
         self.mq_devices = await self.get_mq_devices()
@@ -63,6 +65,24 @@ class HomeHub(UserHub):
                 device = {'deviceId': id, 'deviceType': 'YUBA', 'deviceName': name, 'brand': brand, 'zone': room, 'icon': '', 'properties': [], 'actions': [], 'extensions': {'isHost': True, 'type': type, 'hardwareRFAddress': rf, 'hardwareBindHostAddress': None, 'hardwareBindHostId': None, 'parentId': None, 'hardwareName': 'yuba'}}
                 yuba_devices.append(device)
         return yuba_devices
+    
+    def get_valve_devices(self, devices: any):
+        """Get valve devices"""
+        valve_devices = []
+        # _LOGGER.info(f"Get devices {devices}")
+        for device in devices:
+            if device.get('hardwareName') == 'manip_ctler':
+                id = device.get('hardwareId', None)
+                name = device.get('hardwareNickname', None)
+                brand = device.get('hardwareBrand', None)
+                room = device.get('hardwareRoom', None)
+                type = device.get('hardwareType', None)
+                rf = device.get('hardwareRFAddress', None)
+                bind_host_id = device.get('hardwareBindHostId', None)
+                bind_host_address = device.get('hardwareBindHostAddress', None)
+                device = {'deviceId': id, 'deviceType': 'manip_ctler', 'deviceName': name, 'brand': brand, 'zone': room, 'icon': '', 'properties': [], 'actions': [], 'extensions': {'isHost': False, 'type': type, 'hardwareRFAddress': rf, 'hardwareBindHostAddress': bind_host_address, 'hardwareBindHostId': bind_host_id, 'parentId': bind_host_id, 'hardwareName': 'manip_ctler'}}
+                valve_devices.append(device)
+        return valve_devices
     
     async def get_tcp_devices(self):
         """Get tcp devices"""
