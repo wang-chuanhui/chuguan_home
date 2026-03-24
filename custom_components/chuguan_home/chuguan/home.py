@@ -1,9 +1,10 @@
 from .user import UserHub
-from .const import USER_URL, THIRD_URL, DEVICE_URL
+from .const import USER_URL, THIRD_URL, DEVICE_URL, YS_URL
 import logging
 import uuid
 from .utils import post_json
 from .model import Mode, HardwareInfo
+from .error import CGHAError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -40,12 +41,18 @@ class HomeHub(UserHub):
         tcp_devices = await self.get_tcp_devices()
         yuba_devices = self.get_yuba_devices(tcp_devices)
         valve_devices = self.get_valve_devices(tcp_devices)
+        try:
+            cameras = await self.get_cameras()
+        except Exception as e:
+            cameras = []
         # _LOGGER.info(f"Get YUBA devices result: {yuba_devices}")
         result.extend(yuba_devices)
         result.extend(valve_devices)
+        result.extend(cameras)
         self.devices = result
         self.tcp_devices = tcp_devices
         self.mq_devices = await self.get_mq_devices()
+        self.cameras = cameras
         # _LOGGER.info(f"Get devices result: {result}")
         # _LOGGER.info(f"Get tcp devices result: {tcp_devices}")
         # _LOGGER.info(f"Get mq devices result: {self.mq_devices}")
@@ -92,6 +99,40 @@ class HomeHub(UserHub):
         result = await self.post_data(USER_URL, data)
         return result
     
+    async def get_cameras(self):
+        """Get cameras"""
+        data = {
+            'action': '141_NewHomeApp'
+        }
+        result = await self.post_data(YS_URL, data)
+        self.origin_cameras = result
+        devices = []
+        for device in result:
+            id = device.get('DeviceSerial', None)
+            name = device.get('DevName', None)
+            room = device.get('HomeName', None)
+            if self.brand == 'cg':
+                brand = '初冠'
+            else:
+                brand = '小智慧'
+            if id is not None:
+                devices.append({
+                    'deviceId': id,
+                    'deviceType': 'camera',
+                    'deviceName': name,
+                    'brand': brand,
+                    'zone': room,
+                    'icon': '',
+                    'properties': [],
+                    'actions': [],
+                    'extensions': {'isHost': True, 'type': 'camera'}, 
+                    'ValidateCode': device.get('ValidateCode', None),
+                    'ChannelNo': device.get('ChannelNo', None),
+                    'PicUrl': device.get('PicUrl', None),
+                    }
+                )
+        return devices
+    
     async def get_mq_devices(self):
         """Get mq devices"""
         data = {
@@ -116,6 +157,64 @@ class HomeHub(UserHub):
                 brand = device.get('Brand', None)
                 return HardwareInfo(id, nickname, room, brand)
         return None
+    
+    async def get_camera_live_address(self, id: str):
+        """Get camera live address"""
+        data = {
+            'action': '252_la', 
+            'DeviceSerial': id,
+            "protocol": 3, #流播放协议，1-ezopen、2-hls、3-rtmp、4-flv，默认为1
+            'expireTime': 10 * 24 * 60 * 60, #过期时长，单位秒；针对hls/rtmp/flv设置有效期，相对时间；30秒-720天
+            'supportH265': 0, #请判断播放端是否要求播放视频为H265编码格式,1表示需要，0表示不要求
+            'quality': 2,  #预览视频清晰度【仅针对预览生效，录像回放不支持切换清晰度】，1-高清（主码流）、2-流畅（子码流）
+            'type': 1, #地址的类型，1-预览，2-本地录像回放，3-云存储录像回放，非必选，默认为1；回放仅支持rtmp、ezopen、flv协议
+        }
+        result: list = await self.post_data(YS_URL, data)
+        if result is None or len(result) == 0:
+            return None
+        dic = result[0]
+        code = dic.get('code', None)
+        if code != '200':
+            return None
+        data = dic.get('data', None)
+        if data is None:
+            return None
+        url = data.get('url', None)
+        if url is None:
+            return None
+        return url
+    
+    async def start_ptz(self, id: str, channelNo: str, direction: str, speed: str):
+        """Start ptz"""
+        data = {
+            'action': '252_bp',
+            'DeviceSerial': id,
+            'direction': direction,
+            'speed': speed,
+            'channelNo': channelNo,
+        }
+        result: list = await self.post_data(YS_URL, data)
+        if isinstance(result, list):
+            data = result[0]
+            if isinstance(data, dict):
+                code = data.get('code', None)
+                if code != '200':
+                    msg = data.get('msg', None)
+                    if msg is None:
+                        msg = 'Unknown error'
+                    raise CGHAError.from_msg(msg)
+        return result
+    
+    async def stop_ptz(self, id: str, channelNo: str, direction: str):
+        """Stop ptz"""
+        data = {
+            'action': '252_ep',
+            'DeviceSerial': id,
+            'direction': direction,
+            'channelNo': channelNo,
+        }
+        result: list = await self.post_data(YS_URL, data)
+        return result
 
     async def choose_home(self):
         """Choose home"""

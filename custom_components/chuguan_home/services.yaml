@@ -1,0 +1,60 @@
+camera_ptz:
+  name: "摄像头控制服务"
+  description: "这是一个摄像头控制服务"
+  fields:
+    entity_id:
+      name: "实体ID"
+      description: "要操作的实体标识符"
+      required: true
+      example: "camera.camera"
+      selector:
+        entity:
+          domain: "camera"
+    direction:
+      name: "方向"
+      description: "要执行的方向"
+      required: true
+      default: "0"
+      selector:
+        select:
+          options:
+            - label: "上"
+              value: "0"
+            - label: "下"
+              value: "1"
+            - label: "左"
+              value: "2"
+            - label: "右"
+              value: "3"
+            - label: "左上"
+              value: "4"
+            - label: "左下"
+              value: "5"
+            - label: "右上"
+              value: "6"
+            - label: "右下"
+              value: "7"
+            - label: "物理放大"
+              value: "8"
+            - label: "物理缩小"
+              value: "9"
+            - label: "调整近焦距"
+              value: "10"
+            - label: "调整远焦距"
+              value: "11"
+            - label: "自动控制"
+              value: "16"
+    speed:
+      name: "速度"
+      description: "速度"
+      required: true
+      default: "0"
+      selector:
+        select:
+          options:
+            - label: "慢"
+              value: "0"
+            - label: "适中"
+              value: "1"
+            - label: "快"
+              value: "2"

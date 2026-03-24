@@ -19,3 +19,13 @@ class CGError(Exception):
     def __init__(self, code: str, message: str):
         self.code = code
         self.message = message
+
+class CGHAError(HomeAssistantError):
+    """Error to indicate chuguan home error."""
+
+    @staticmethod
+    def from_msg(msg: str):
+        """Create error from msg"""
+        err = CGHAError()
+        err._message = msg
+        return err

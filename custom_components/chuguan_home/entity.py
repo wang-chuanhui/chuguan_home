@@ -45,8 +45,10 @@ class ChuGuanEntity(Entity):
             if device and device.get("identifiers", None):
                 get_device = device_registry.async_get_device(device.get("identifiers"))
                 if get_device and get_device.area_id is None:
-                    device_registry.async_update_device(get_device.id, area_id=area.id)
-                    _LOGGER.info(f"Add device {get_device.id} to area {area.id} {area.name}")
+                    area = area_registry.async_get_area(get_device.area_id)
+                    if area is not None:
+                        device_registry.async_update_device(get_device.id, area_id=area.id)
+                        _LOGGER.info(f"Add device {get_device.id} to area {area.id} {area.name}")
             get_entity = entity_registry.async_get(entity.entity_id)
             if get_entity and get_entity.area_id is None:
                 area = area_registry.async_get_or_create(name=entity._device.zone)
