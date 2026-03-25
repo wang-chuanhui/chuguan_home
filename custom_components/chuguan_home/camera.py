@@ -85,14 +85,12 @@ class ChuGuanGenericCamera(ChuGuanEntity, GenericCamera):
                 },
             }
         self._attr_extra_state_attributes["ptz"] = ptz
-        _LOGGER.error(self.extra_state_attributes)
         self.async_write_ha_state()
 
     @callback
     async def _async_update_stream_source(self, now: datetime) -> None:
         """Bump the sum."""
         address = await self._device.home.get_camera_live_address(self._device.device_id)
-        _LOGGER.error("update address %s", address)
         if address is not None:
             self._stream_source = Template(address, self.hass)
             self.async_write_ha_state()
@@ -100,7 +98,6 @@ class ChuGuanGenericCamera(ChuGuanEntity, GenericCamera):
 
     async def async_added_to_hass(self):
         await super().async_added_to_hass()
-        _LOGGER.error('async_added_to_hass %s', self.entity_id)
         self.async_on_remove(
             async_track_time_interval(
                 self.hass, self._async_update_stream_source, timedelta(seconds=360 * 24 * 60 * 60)
@@ -111,11 +108,8 @@ class ChuGuanGenericCamera(ChuGuanEntity, GenericCamera):
         """Camera ptz"""
         id = self._device.device_id
         channelNo = self._device.device.get('ChannelNo', '1')
-        _LOGGER.error("ptz %s %s %s %s", id, channelNo, direction, speed)
         result = await self._device.home.start_ptz(id, channelNo, direction, speed)
-        _LOGGER.error(result)
         stop = await self._device.home.stop_ptz(id, channelNo, direction)
-        _LOGGER.error(stop)
 
     async def async_camera_image(
             self, width: int | None = None, height: int | None = None
