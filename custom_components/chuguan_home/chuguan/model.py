@@ -15,7 +15,8 @@ class UserInfo:
 
 
 def toUserInfo(dic: dict):
-	return UserInfo(dic['account'], dic['lastName'], dic['userid'])
+	return UserInfo(dic.get('account', ''), dic.get('lastName', ''), dic.get('userid', ''))
+
 
 def toUserInfoList(arr: list):
 	return [toUserInfo(item) for item in arr]
