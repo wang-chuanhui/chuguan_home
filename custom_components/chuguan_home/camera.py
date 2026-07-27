@@ -55,6 +55,14 @@ class ChuGuanGenericCamera(ChuGuanEntity, GenericCamera):
             "use_wallclock_as_timestamps": False,
             # "username": "admin",
             "verify_ssl": False,
+            "advanced": {
+                "limit_refetch_to_url_change": False,
+                "framerate": 2.0,
+                "verify_ssl": False, 
+                "rtsp_transport": "tcp",
+                "use_wallclock_as_timestamps": False, 
+                "authentication": "basic",
+            },
         }
         ChuGuanEntity.__init__(self, device)
         GenericCamera.__init__(self, hass, options, device.device_id, device.device_name)
