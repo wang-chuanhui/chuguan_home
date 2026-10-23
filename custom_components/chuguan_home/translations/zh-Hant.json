@@ -1,0 +1,39 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "設備已配置"
+        },
+        "error": {
+            "cannot_connect": "連接失敗",
+            "invalid_auth": "無效的身份驗證",
+            "unknown": "未知錯誤",
+            "no_home_found": "未找到家庭"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "host": "品牌",
+                    "password": "密碼",
+                    "username": "用戶名",
+                    "brand": "品牌"
+                }
+            },
+            "home": {
+                "data": {
+                    "home_id": "家庭"
+                }
+            },
+            "password": {
+                "password": "密碼"
+            }
+        }
+    },
+    "selector": {
+        "brand": {
+            "options": {
+                "cg": "初冠",
+                "xzh": "小智慧"
+            }
+        }
+    }
+}

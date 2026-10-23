@@ -5,7 +5,9 @@
     "@wang-chuanhui"
   ],
   "config_flow": true,
-  "dependencies": [],
+  "dependencies": [
+    "generic"
+  ],
   "documentation": "https://github.com/wang-chuanhui/chuguan_home",
   "issue_tracker": "https://github.com/wang-chuanhui/chuguan_home/issues",
   "homekit": {},
