@@ -24,7 +24,9 @@
                 }
             }, 
             "password": {
-                "password": "密码"
+                "data": {
+                    "password": "密码"
+                }
             }
         }
     },

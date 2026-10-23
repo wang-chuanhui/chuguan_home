@@ -9,12 +9,9 @@
     "generic"
   ],
   "documentation": "https://github.com/wang-chuanhui/chuguan_home",
-  "issue_tracker": "https://github.com/wang-chuanhui/chuguan_home/issues",
-  "homekit": {},
   "integration_type": "hub",
   "iot_class": "cloud_push",
+  "issue_tracker": "https://github.com/wang-chuanhui/chuguan_home/issues",
   "requirements": ["paho-mqtt>=1.6.1"],
-  "ssdp": [],
-  "zeroconf": [],
   "version": "1.0.0"
 }

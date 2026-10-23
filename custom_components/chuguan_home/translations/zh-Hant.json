@@ -24,7 +24,9 @@
                 }
             },
             "password": {
-                "password": "密碼"
+                "data": {
+                    "password": "密碼"
+                }
             }
         }
     },
