@@ -156,7 +156,6 @@ class ChuGuanAirConditioner(ChuGuanEntity, ClimateEntity):
 
     async def async_set_temperature(self, **kwargs):
         """Set new target temperature."""
-        _LOGGER.info("async_set_temperature %s", kwargs)
         temp = kwargs.get('temperature', None)
         if temp is not None:
             await self._device.set_temperature(temp)

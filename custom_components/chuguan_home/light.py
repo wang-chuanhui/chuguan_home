@@ -71,7 +71,6 @@ class ChuGuanLight(ChuGuanEntity, LightEntity):
     
     async def async_turn_on(self, **kwargs):
         """Turn the light on."""
-        _LOGGER.info("async_turn_on %s", kwargs)
         if self._device.powerstate == False:
             await self._device.set_powerstate(True)
         if ATTR_BRIGHTNESS in kwargs:

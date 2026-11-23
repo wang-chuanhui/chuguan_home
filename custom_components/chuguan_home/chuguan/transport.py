@@ -16,7 +16,6 @@ class Transport(EventEmitter):
         self._broker = broker
         self._port = port
         self._client_id = user_id.lower()
-        _LOGGER.info(f"self._client_id: {self._client_id}, account: {account}")
         self._client = mqtt.Client(client_id=self._client_id, clean_session=True, transport="websockets", reconnect_on_failure=False)
         self._client.on_connect = self.on_connect
         self._client.on_connect_fail = self.on_connect_fail
@@ -51,7 +50,7 @@ class Transport(EventEmitter):
         """连接回调方法"""
         if rc == 0:
             self._connected = True
-            _LOGGER.info(f"成功连接到 {self._broker}:{self._port}")
+            _LOGGER.info(f"成功连接到broker")
             self._client.subscribe(f"/app/forward/cg/wx/{self._client_id}/set", qos=0)
         else:
             self._connected = False

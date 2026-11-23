@@ -73,15 +73,12 @@ class ChuGuanValve(ChuGuanEntity, ValveEntity):
     
     async def async_open_valve(self, **kwargs):
         """Open the valve."""
-        _LOGGER.info("async_open_valve %s", kwargs)
         await self._device.set_powerstate(True)
     
     async def async_close_valve(self, **kwargs):
         """Close the valve."""
-        _LOGGER.info("async_close_valve %s", kwargs)
         await self._device.set_powerstate(False)
 
     async def async_stop_valve(self, **kwargs):
         """Stop the valve."""
-        _LOGGER.info("async_stop_valve %s", kwargs)
         await self._device.set_pause()

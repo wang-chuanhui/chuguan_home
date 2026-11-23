@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from homeassistant.config_entries import ConfigEntry, ConfigEntryAuthFailed
+from custom_components.chuguan_home.chuguan.error import InvalidAuth
+from homeassistant.config_entries import ConfigEntry, ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 import logging
@@ -29,7 +30,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry) -> bool:
 
     # TODO 4. Create an instance of your platform class
     # TODO 5. Add the instance to hass.data
-    _LOGGER.info("async_setup_entry with entry %s %s", entry, entry.data)
 
     hub = Hub(hass, entry.data[CONF_BRAND], entry.data[CONF_UUID], entry.data[CONF_PROVINCE], entry.data[CONF_USERNAME], entry.data[CONF_USER_ID], entry.data[CONF_HOME_ID])
     try:
@@ -43,10 +43,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry) -> bool:
         hub._entry_id = entry.entry_id
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
         return True
+    except InvalidAuth as e:
+        hub.stop()
+        _LOGGER.error("InvalidAuth %s", e)
+        raise ConfigEntryAuthFailed from e
     except Exception as e:
         hub.stop()
         _LOGGER.error("async_get_devices failed %s", e)
-        raise ConfigEntryAuthFailed from e
+        raise ConfigEntryNotReady from e
 
 
 # TODO Update entry annotation

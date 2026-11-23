@@ -99,20 +99,12 @@ class ConfigFlow(ParentConfigFlow, domain=DOMAIN):
                 lower_digit = string.ascii_lowercase + string.digits
                 random_str = ''.join(random.choices(lower_digit, k=6))
                 user_input[CONF_PROVINCE] = 'ha_' + random_str
-                _LOGGER.info("async_step_user with new province %s", user_input[CONF_PROVINCE])
-            else:
-                _LOGGER.info("async_step_user with existing province %s", user_input[CONF_PROVINCE])
             if CONF_UUID not in user_input:
                 user_input[CONF_UUID] = str(uuid.uuid4())
-                _LOGGER.info("async_step_user with new uuid %s", user_input[CONF_UUID])
-            else:
-                _LOGGER.info("async_step_user with existing uuid %s", user_input[CONF_UUID])
             info = await validate_input(self.hass, user_input)
             self.first_data = info
-            _LOGGER.info("async_step_user with info %s", info)
             self.homes = await get_home(self.hass, info)
             self.home_info_list = [{'value': home_info.HomeId, 'label': home_info.HomeName} for home_info in self.homes]
-            _LOGGER.info("async_step_home with home_info_list %s", self.home_info_list)
             self.home_schema = vol.Schema(
                 {
                     vol.Required(CONF_HOME_ID): SelectSelector(
@@ -137,8 +129,8 @@ class ConfigFlow(ParentConfigFlow, domain=DOMAIN):
                 errors["base"] = "invalid_auth"
             else:
                 errors["base"] = e.message
-        except Exception:
-            _LOGGER.exception("Unexpected exception")
+        except Exception as e:
+            _LOGGER.exception("Unexpected exception %s", e)
             errors["base"] = "unknown"
         return self.async_show_form(
                 step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
@@ -182,7 +174,6 @@ class ConfigFlow(ParentConfigFlow, domain=DOMAIN):
             )
     
     async def async_step_password(self, user_input: dict[str: any]) -> ConfigFlowResult:
-        _LOGGER.info("async_step_password with user_input %s", user_input)
         if user_input is None:
             return self.async_show_form(
                 step_id="password", data_schema=STEP_PASSWORD_SCHEMA, errors={}
@@ -193,7 +184,6 @@ class ConfigFlow(ParentConfigFlow, domain=DOMAIN):
             try:
                 info = await validate_input(self.hass, self.reauth_data)
                 self.first_data = info
-                _LOGGER.info("async_step_password with info %s", info)
                 return await self.async_check_home(self.reauth_data)
             except CannotConnect:
                 errors["base"] = "cannot_connect"
@@ -230,10 +220,8 @@ class ConfigFlow(ParentConfigFlow, domain=DOMAIN):
             self.first_data[CONF_HOME_NAME] = home.HomeName
             title = f"{self.first_data[CONF_NICK_NAME]}-{home.HomeName}"
             entry = self._get_reauth_entry()
-            _LOGGER.info("async_check_home with entry %s", entry)
             return self.async_update_reload_and_abort(entry, title=title, data=self.first_data)
         self.home_info_list = [{'value': home_info.HomeId, 'label': home_info.HomeName} for home_info in self.homes]
-        _LOGGER.info("async_check_home with home_info_list %s", self.home_info_list)
         self.home_schema = vol.Schema(
             {
                 vol.Required(CONF_HOME_ID): SelectSelector(

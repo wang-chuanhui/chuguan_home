@@ -31,9 +31,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry, async_ad
     async_add_entities(new_entities, True)
     ChuGuanEntity.register_entity_areas(hass, new_entities)
 
-    for camera in new_entities:
-        camera.setup_ptz()
-
     platform = async_get_current_platform()
     platform.async_register_entity_service("camera_ptz", {vol.Required("direction"): cv.string,vol.Required("speed"): cv.string,}, "async_camera_ptz")
 
@@ -68,7 +65,9 @@ class ChuGuanGenericCamera(ChuGuanEntity, GenericCamera):
         GenericCamera.__init__(self, hass, options, device.device_id, device.device_name)
         self._attr_extra_state_attributes = {}
 
-    def setup_ptz(self):
+    def async_added_to_hass(self):
+        """"""
+        super().async_added_to_hass()
         ptz = {
                 "service": "chuguan_home.camera_ptz",
                 "data_left": {

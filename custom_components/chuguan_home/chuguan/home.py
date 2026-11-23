@@ -45,7 +45,6 @@ class HomeHub(UserHub):
             cameras = await self.get_cameras()
         except Exception as e:
             cameras = []
-        # _LOGGER.info(f"Get YUBA devices result: {yuba_devices}")
         result.extend(yuba_devices)
         result.extend(valve_devices)
         result.extend(cameras)
@@ -53,9 +52,6 @@ class HomeHub(UserHub):
         self.tcp_devices = tcp_devices
         self.mq_devices = await self.get_mq_devices()
         self.cameras = cameras
-        # _LOGGER.info(f"Get devices result: {result}")
-        # _LOGGER.info(f"Get tcp devices result: {tcp_devices}")
-        # _LOGGER.info(f"Get mq devices result: {self.mq_devices}")
         return result
     
     def get_yuba_devices(self, devices: any):
@@ -76,7 +72,6 @@ class HomeHub(UserHub):
     def get_valve_devices(self, devices: any):
         """Get valve devices"""
         valve_devices = []
-        # _LOGGER.info(f"Get devices {devices}")
         for device in devices:
             if device.get('hardwareName') == 'manip_ctler':
                 id = device.get('hardwareId', None)
@@ -220,14 +215,12 @@ class HomeHub(UserHub):
         """Choose home"""
         data = {'action': '307_us', 'actionType': 'UserSignChangeHome', 'homeId': self.home_id}
         result = await self.post_data(USER_URL, data)
-        _LOGGER.info(f"Choose home {self.home_id} result: {result}")
         return result
 
     async def refresh_home_devices_state(self):
         """Refresh home devices state"""
         data = {'action': '307_us', 'actionType': 'UserSignRefreshHomeDevice', 'homeId': self.home_id}
         result = await self.post_data(USER_URL, data)
-        _LOGGER.info(f"Refresh home devices state result: {result}")
         return result
 
     async def post_json(self, url: str, payload: dict):
@@ -239,9 +232,7 @@ class HomeHub(UserHub):
         account = self.account
         data = { "payload": { "accessToken": f'wx/{account}', "appliance": { "applianceId": device.get('deviceId'), "additionalApplianceDetails": device.get('extensions') } }, "header": { "messageId": str(uuid.uuid4()), "namespace": "ThirdParty.ConnectedHome.Control", "name": name, "payloadVersion": "1" } }
         data['payload'].update(payload)
-        _LOGGER.info(f"Control device {device.get('deviceId')} with name {name} and data {data}")
         result = await self.post_json(THIRD_URL, data)
-        _LOGGER.info(f"result: {result}")
         return result
 
     async def set_powerstate(self, device: dict, value: bool):

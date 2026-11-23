@@ -44,13 +44,10 @@ async def submit_data(session: aiohttp.ClientSession, url: str, payload: dict):
             result: dict = json.loads(text)
             result_code = result.get('resultCode', '10000')
             if result_code == '20000':
-                # _LOGGER.info(f"{url} {payload} {result}")
                 return result.get('resultData')
             if result_code == '10001':
-                _LOGGER.info(f"{url} {payload} {result}")
                 raise InvalidAuth("登录失效")
             message = result.get('message', '没有数据')
-            _LOGGER.info(f"{url} {payload} {result}")
             raise CGError(result_code, message)
     except aiohttp.ClientError as e:
         _LOGGER.error("POST 错误: %s", e)

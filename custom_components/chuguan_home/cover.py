@@ -91,7 +91,6 @@ class ChuGuanCover(ChuGuanEntity, CoverEntity):
 
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
-        _LOGGER.info("async_open_cover %s", kwargs)
         if self.isHanger:
             await self._device.set_powerstate(False)
         else:
@@ -99,7 +98,6 @@ class ChuGuanCover(ChuGuanEntity, CoverEntity):
     
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
-        _LOGGER.info("async_close_cover %s", kwargs)
         if self.isHanger:
             await self._device.set_powerstate(True)
         else:
@@ -107,12 +105,10 @@ class ChuGuanCover(ChuGuanEntity, CoverEntity):
 
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""
-        _LOGGER.info("async_stop_cover %s", kwargs)
         await self._device.set_pause()
 
     async def async_set_cover_position(self, **kwargs):
         """Set the cover position."""
-        _LOGGER.info("async_set_cover_position %s", kwargs)
         position = kwargs.get(ATTR_POSITION)
         if position is None:
             return

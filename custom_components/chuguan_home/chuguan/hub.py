@@ -44,12 +44,11 @@ class Hub:
 
     def __del__(self):
         """Stop hub"""
-        _LOGGER.info("Stop hub %s %s", self._home_hub.brand, self._home_hub.uuid)
+        _LOGGER.info("Stop hub %s", self._home_hub.brand)
 
     async def async_get_devices(self):
         """Get devices"""
         devices = await self._home_hub.get_devices()
-        # _LOGGER.info("Get devices %s", devices)
         self.devices = [ChuGuanDevice(device, self._home_hub, self.get_state(device.get('deviceId'))) for device in devices]
         return devices
 
@@ -66,7 +65,6 @@ class Hub:
         if self._is_stop:
             return
         try:
-            _LOGGER.info("Begin Choose home")
             await self._home_hub.choose_home()
         except InvalidAuth as e:
             _LOGGER.error("Choose home failed: %s", e)

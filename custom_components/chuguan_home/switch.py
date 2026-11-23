@@ -45,7 +45,6 @@ class ChuGuanSwitch(ChuGuanEntity, SwitchEntity):
     
     async def async_turn_on(self, **kwargs):
         """Turn the switch on."""
-        _LOGGER.info("async_turn_on %s", kwargs)
         await self._device.set_powerstate(True)
 
 
